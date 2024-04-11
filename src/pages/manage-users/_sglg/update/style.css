@@ -1,0 +1,27 @@
+:root {
+  padding: 0;
+  margin: 0;
+}
+:root .audit-field-header {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 0px 10px;
+}
+:root .audit-field-content {
+  display: flex;
+  flex-direction: column;
+  gap: "5px";
+  width: 100%;
+  height: 90%;
+  overflow: auto;
+}
+:root .audit-field-content .sample-box {
+  width: 100%;
+  min-height: 200px;
+  height: 200px;
+  border: 1px solid black;
+}/*# sourceMappingURL=style.css.map */

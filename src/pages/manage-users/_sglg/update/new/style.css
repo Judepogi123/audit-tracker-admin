@@ -1,0 +1,89 @@
+:root {
+  padding: 0;
+  margin: 0;
+}
+:root .field-header {
+  padding: 10px;
+  width: 100%;
+  height: 8%;
+  border: 1px solid #ccc;
+}
+:root .new-field-content {
+  width: 100%;
+  height: 84%;
+  display: flex;
+  border: 1px solid black;
+  flex-direction: column;
+  overflow: auto;
+}
+:root .new-field-content .indicator {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+:root .new-field-content .indicator .indicator-header {
+  width: 100%;
+  height: 15%;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  padding: 0px 10px;
+  margin-bottom: 10px;
+}
+:root .new-field-content .indicator .indicator-content {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 10px;
+  gap: 5px;
+}
+:root .new-field-content .indicator .indicator-content .indicator-content-item {
+  width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+:root .field-item {
+  width: 100%;
+  height: auto;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+:root .field-item-new {
+  width: 100%;
+  height: auto;
+  display: flex;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+:root .field-item-new .field-item-new-icon {
+  display: flex;
+  gap: 10px;
+}
+
+.field-footer {
+  width: 100%;
+  height: 8%;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
+  align-items: center;
+  gap: 10px;
+}
+
+.method-item {
+  width: 100%;
+  height: auto;
+  display: flex;
+}/*# sourceMappingURL=style.css.map */

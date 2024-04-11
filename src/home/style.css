@@ -1,0 +1,18 @@
+:root {
+  margin: 0;
+  padding: 0;
+}
+:root .main-container {
+  width: 100%;
+  height: 100%;
+}
+:root .main-container .header-container {
+  width: 100%;
+  height: 10%;
+}
+:root .main-container .content-container {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  flex-direction: row;
+}/*# sourceMappingURL=style.css.map */

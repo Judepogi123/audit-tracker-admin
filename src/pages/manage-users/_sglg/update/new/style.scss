@@ -1,0 +1,106 @@
+:root{
+    padding: 0;
+    margin: 0;
+
+    .field-header{
+        padding: 10px;
+        width: 100%;
+        height: 8%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .new-field-content{
+        width: 100%;
+        height: 84%;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+
+
+        .indicator{
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+
+            .indicator-header{
+                width: 100%;
+                height: 15%;
+                display: flex;
+                align-items: center;
+                padding: 0px 10px;
+                margin-bottom: 10px;
+            }
+            .indicator-content{
+                width: 100%;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                padding: 0px 10px;
+                gap: 5px;
+
+                .indicator-content-item{
+                    width: 100%;
+                    height: auto;
+                    border-radius: 5px;
+
+                    .indicator-content-header{
+                        width: 100%;
+                        height: auto;
+                        display: flex;
+                        flex-direction: column;
+                        padding: 5px;
+                        border-radius: 5px;
+                        border: 1px solid #ccc;
+                        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    .field-item{
+        width: 100%;
+        height: auto;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    
+    }
+    .field-item-new{
+        width: 100%;
+        height: auto;
+        display: flex;
+        cursor: pointer;
+        justify-content: center;
+        align-items: center;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+
+        .field-item-new-icon{
+            display: flex;
+            gap: 10px;
+        }
+    }
+}
+.field-footer{
+    width: 100%;
+    height: 8%;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: 5px;
+    align-items: center;
+    gap: 10px;
+}
+
+.method-item{
+    width: 100%;
+    height: auto;
+    display: flex;
+}
