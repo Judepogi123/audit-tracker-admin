@@ -7,6 +7,7 @@ interface LayoutProps {
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement> | undefined;
   onMouseLeave?: React.MouseEventHandler<HTMLDivElement> | undefined;
   id?: string;
+  className?: string
 }
 
 const Layout = ({
@@ -15,9 +16,11 @@ const Layout = ({
   onMouseEnter,
   onMouseLeave,
   id,
+  className
 }: LayoutProps) => {
   return (
     <MainLayout
+    className={className}
       id={id}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

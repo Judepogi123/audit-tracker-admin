@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +10,8 @@ import Badge from "../../../components/Badge";
 import { Typography, message } from "antd";
 
 import "./style.scss";
+
+import { useComplianceData } from "../../../provider/ComlianceDataProvider";
 
 interface RequirementsProps {
   condition: string;
@@ -48,96 +50,44 @@ interface FieldProps {
   type: string;
   dependencies: { method: string; value: number };
   description: string;
-  requirements: RequirementsProps[];
-  indicators: IndicatorsProps[];
+  requirements?: RequirementsProps[];
+  indicators?: IndicatorsProps[];
   pushKey: string;
 }
 
 interface DataProps {
-  fieldAnnswer: string;
+  fieldAnswer: string;
   fieldPushKey: string;
   pushKey: string;
   status: string;
   viewed: boolean;
   timestamp: string;
   zipCode: string;
-  senderZ: string;
+  sender: string;
 }
 
 const Header = ({
   setSelectedMunicipal,
+  complianceList,
+  fieldsList,
+  setFieldsList
 }: {
   setSelectedMunicipal: React.Dispatch<React.SetStateAction<string>>;
+  complianceList: DataProps[] | [];
+  setFieldsList: React.Dispatch<React.SetStateAction<{ label: string | React.ReactNode; key: string }[] | undefined>>;
+  fieldsList: { label: string | React.ReactNode; key: string }[] | undefined;
 }) => {
   const [fields, setFields] = useState<
     { label: string | React.ReactNode; key: string }[] | undefined
   >(undefined);
   const [messageApi, contextMessage] = message.useMessage();
-  const [Loading, setIsLoading] = useState<boolean>();
-  const [errors, setErrors] = useState<string | undefined>();
 
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ["compliedCount"],
-    queryFn: () => axios.get("/data/compliance"),
-  });
-
-  const handleGetNewCount = (pushKey: string) => {
-    if (data?.data && !isError && !isLoading) {
-      const newCopy = [...Object.values(data.data as DataProps[])];
-      return newCopy.filter(item => item.fieldPushKey === pushKey && !item.viewed).length
-    }
-    return 0;
-  };
-
-  console.log(data?.data);
+  useEffect(()=>{
+    const temp = localStorage.getItem("fieldDataList")
+    const data: { label: string | React.ReactNode; key: string }[] | undefined = JSON.parse(temp as string)
+    setFieldsList(data)
+  },[])
   
-
-  const handleGetLabelAndKey = (list: FieldProps[]) => {
-    let temp: { key: string; label: string | React.ReactNode }[] = [
-      { key: "all", label: "All" },
-    ];
-    const listCopy = [...list];
-
-    if (list && Array.isArray(list)) {
-      for (let item of listCopy) {
-        const newItem = {
-          key: item.pushKey,
-          label: (
-            <Badge
-              count={handleGetNewCount(item.pushKey)}
-              children={item.title}
-            />
-          ),
-        };
-        temp.push(newItem);
-      }
-    }
-    return temp;
-  };
-
-  const handleGetFields = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`/data/audit-fields`);
-      if (response.status === 200 && response.data) {
-        const temp = handleGetLabelAndKey(response.data);
-        setFields(temp);
-        setIsLoading(false);
-      } else {
-        messageApi.error("No fields found to display.");
-      }
-    } catch (error) {
-      messageApi.error(`${error}`);
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    handleGetFields();
-    return () => setFields(undefined);
-  }, []);
 
   return (
     <Layout style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
@@ -156,7 +106,7 @@ const Header = ({
         <Tabs
           onChange={(key: string) => setSelectedMunicipal(key)}
           defaultActiveKey="all"
-          items={fields}
+          items={fieldsList}
         />
       </div>
     </Layout>

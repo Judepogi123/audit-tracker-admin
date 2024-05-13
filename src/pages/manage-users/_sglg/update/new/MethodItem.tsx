@@ -15,13 +15,14 @@ import {
   RadioChangeEvent,
 } from "antd";
 
+
+
 import { CiCircleRemove } from "react-icons/ci";
 
-interface RequirementsProp{
+interface RequirementsProp {
   condition: string;
-  value: {id: string, query: string, status: boolean}[];
+  value: { id: string; query: string; status: boolean }[];
 }
-
 
 interface ValueProps {
   title: string;
@@ -41,7 +42,10 @@ interface MethodItemProps {
     type: string,
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
-  handleUpdateAlphanumeric: ( id: string,e: React.ChangeEvent<HTMLInputElement>)=> void
+  handleUpdateAlphanumeric: (
+    id: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => void;
 }
 
 interface IndicatorsProps {
@@ -57,6 +61,7 @@ interface IndicatorsProps {
   type: "indicator" | "subIndicator";
   subIndicator?: IndicatorsProps[];
   stage: number;
+  marked: boolean;
 }
 
 interface FieldProps {
@@ -69,7 +74,6 @@ interface FieldProps {
   indicators: IndicatorsProps[];
 }
 
-
 const MethodItem = ({
   id,
   methodType,
@@ -78,9 +82,34 @@ const MethodItem = ({
   handleRemoveIndicatorValue,
   handleEditValueTitle,
   handleUpdateMethodType,
-  handleUpdateAlphanumeric
+  handleUpdateAlphanumeric,
 }: MethodItemProps) => {
 
+  const handleDefinemethod = (value: string) => {
+    if (value.includes("%")) {
+      return "%";
+    } else if (value.includes("₱")) {
+      return "₱";
+    } else if (value.includes("0")) {
+      return "0";
+    } else {
+      return "0";
+    }
+  };
+
+  const handleDefineCondition = (value: string) => {
+    if (value.includes("null")) {
+      return "null";
+    } else if (value.includes("min")) {
+      return "min";
+    } else if (value.includes("max")) {
+      return "max";
+    } else if (value.includes("equal")) {
+      return "equal";
+    } else {
+      return "null";
+    }
+  };
 
   if (methodType === "radio_button") {
     return (
@@ -168,6 +197,7 @@ const MethodItem = ({
       </div>
     );
   }
+
   if (methodType?.includes("num")) {
     return (
       <div style={{ width: "100%", display: "flex" }}>
@@ -196,6 +226,7 @@ const MethodItem = ({
               <Typography.Text style={{ width: "100%" }}>Type:</Typography.Text>
             </div>
             <MRadio.Group
+              value={handleDefinemethod(items.dataInputMethod.type as string)}
               onChange={(e: RadioChangeEvent) =>
                 handleUpdateMethodType(items.id, e.target.value, 2)
               }
@@ -215,7 +246,8 @@ const MethodItem = ({
               </Typography.Text>
             </div>
             <Input
-            onChange={(e)=> handleUpdateAlphanumeric(items.id, e)}
+              value={items.dataInputMethod.value as string}
+              onChange={(e) => handleUpdateAlphanumeric(items.id, e)}
               disabled={items.dataInputMethod.type?.includes(":0")}
               style={{ width: "200px" }}
               size={"small"}
@@ -238,6 +270,7 @@ const MethodItem = ({
               </Typography.Text>
             </div>
             <MRadio.Group
+            value={handleDefineCondition(items.dataInputMethod.type as string)}
               disabled={items.dataInputMethod.type?.includes(":0")}
               onChange={(e: RadioChangeEvent) =>
                 handleUpdateMethodType(items.id, e.target.value, 1)

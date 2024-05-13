@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Button from "../../components/Button";
 import InputPassword from "../../components/InputPassword";
 import Input from "../../components/Input";
+import {message} from "antd"
 
 import { Outlet, useNavigate } from "react-router-dom";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
@@ -21,8 +22,11 @@ interface FormFields {
 function Login() {
   const singnIn = useSignIn();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [messageApi, contextMessage] = message.useMessage()
 
   async function onFinish(values: FormFields) {
+    setIsLoading(true)
     try {
       const response = await axios.post(
         "http://localhost:3000/auth/login",
@@ -39,14 +43,18 @@ function Login() {
             name: response.data.username,
           },
         })
+        
       ) {
+        setIsLoading(false)
         navigate("/");
       } else {
         navigate("/auth/login");
       }
-      console.log(response.data);
+      
     } catch (error) {
-      console.log("Failed!", error);
+      messageApi.error(`Sorry something went wrong: ${error}`)
+    }finally{
+      setIsLoading(false)
     }
   }
 
@@ -60,6 +68,7 @@ function Login() {
         alignItems: "center",
       }}
     >
+      {contextMessage}
       <div className="login-container">
         <Form
           initialValues={{ remember: true }}
@@ -99,17 +108,13 @@ function Login() {
 
           <div className="login-footer">
             <Button
+            loading={isLoading}
               style={{ backgroundColor: "#3a86ff", height: "40px" }}
               htmlType="submit"
               type={"primary"}
               children={"Login"}
             />
-            <div>
-              <Button
-                type={"link"}
-                children={"Don't have an account yet? Register"}
-              ></Button>
-            </div>
+
           </div>
         </Form>
       </div>

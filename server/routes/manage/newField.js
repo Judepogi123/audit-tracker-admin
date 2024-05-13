@@ -1,6 +1,6 @@
 import express from "express";
 import { database } from "../../../firebase/dbConfig.js";
-import { ref, set, push } from "../../../firebase/dbConfig.js";
+import { ref, set, push, remove,get } from "../../../firebase/dbConfig.js";
 
 import { currentDate } from "../../../src/utils/_js-date-provider.js";
 
@@ -14,11 +14,12 @@ router.post("/new-field", async (req, res) => {
         .status(400)
         .json({ message: "Bad Request: Request body is missing." });
     }
+    const areaRef = ref(database, `System/auditInfo/fields/${request.areaKey}`)
+    const areaPushKey =await push( ref(database, `System/auditInfo/fields/`))
+    const snapshot = await get(areaRef)
+    const areaKey = snapshot.exists() ? request.areaKey : areaPushKey.key
 
-    const auditPath = ref(database, "System/auditInfo/fields");
-    const fieldPushKey = await push(auditPath);
-
-    await set(ref(database, `System/auditInfo/fields/${fieldPushKey.key}`), {
+    await set(ref(database, `System/auditInfo/fields/${areaKey}`), {
       authorFullname: request.authorFullname,
       authorUsername: request.authorUsername,
       description: request.description,
@@ -26,26 +27,39 @@ router.post("/new-field", async (req, res) => {
         ? JSON.stringify(request.requirements)
         : [],
       title: request.title,
-      timestamp: currentDate,
-      pushKey: fieldPushKey.key,
+      pushKey: areaKey,
+      timestamp: request.date,
+      auditKey: request.auditKey,
+      localeType: request.localeType,
+      locked: false,
+      archived: false
     });
 
-    // const userLogsPath = ref(database, `System/Logs/systemLogs`);
-    // const userLogsPushKey = await push(userLogsPath)
+    await remove(
+      ref(database, `System/auditInfo/draft/area/${request.areaKey}`)
+    );
 
-    // await set(ref(database, `System/Logs/systemLogs/${userLogsPushKey.key}`))
+    const logsPushKey = await push(ref(database, `System/activityLogs/`));
+    await set(
+      ref(database, `System/activityLogs/${logsPushKey.key}`),
+      {
+        title: `${request.authorFullname} created new area :(${request.title})`,
+        date: request.date,
+        pushKey: logsPushKey.key
+      }
+    );
 
     if (request.indicators && request.indicators.length > 0) {
       const indicatorPath = ref(
         database,
-        `System/auditInfo/fields/${fieldPushKey.key}/indicators`
+        `System/auditInfo/fields/${areaKey}/indicators`
       );
       for (let indicator of request.indicators) {
         const indicatorPushKey = await push(indicatorPath);
         await set(
           ref(
             database,
-            `System/auditInfo/fields/${fieldPushKey.key}/indicators/${indicatorPushKey.key}`
+            `System/auditInfo/fields/${areaKey}/indicators/${indicatorPushKey.key}`
           ),
           {
             dataInputMethod: {
@@ -57,23 +71,25 @@ router.post("/new-field", async (req, res) => {
             mov: indicator.mov,
             query: indicator.query,
             type: indicator.type,
-            key: indicator.id,
+            id: indicator.id,
             pushKey: indicatorPushKey.key,
-            path: `${fieldPushKey.key}/indicators/${indicatorPushKey.key}`,
+            path: `${areaKey}/indicators/${indicatorPushKey.key}`,
+            status: false,
+            stage:indicator.stage
           }
         );
 
         if (indicator.subIndicator && indicator.subIndicator.length > 0) {
           const subIndicatorPath = ref(
             database,
-            `System/auditInfo/fields/${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator`
+            `System/auditInfo/fields/${areaKey}/indicators/${indicatorPushKey.key}/subIndicator`
           );
           for (let subIndicator of indicator.subIndicator) {
             const subIndicatorPushKey = await push(subIndicatorPath);
             await set(
               ref(
                 database,
-                `System/auditInfo/fields/${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}`
+                `System/auditInfo/fields/${areaKey}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}`
               ),
               {
                 dataInputMethod: {
@@ -85,9 +101,11 @@ router.post("/new-field", async (req, res) => {
                 mov: subIndicator.mov,
                 query: subIndicator.query,
                 type: subIndicator.type,
-                key: subIndicator.id,
+                id: subIndicator.id,
                 pushKey: subIndicatorPushKey.key,
-                path: `${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}`
+                path: `${areaKey}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}`,
+                status: false,
+                stage: subIndicator.stage
               }
             );
 
@@ -97,14 +115,14 @@ router.post("/new-field", async (req, res) => {
             ) {
               const subIndicatorSecPath = ref(
                 database,
-                `System/auditInfo/fields/${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator`
+                `System/auditInfo/fields/${areaKey}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator`
               );
               for (let subIndicatorSec of subIndicator.subIndicator) {
                 const subIndicatorSecPushKey = await push(subIndicatorSecPath);
                 await set(
                   ref(
                     database,
-                    `System/auditInfo/fields/${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator/${subIndicatorSecPushKey.key}`
+                    `System/auditInfo/fields/${areaKey}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator/${subIndicatorSecPushKey.key}`
                   ),
                   {
                     dataInputMethod: {
@@ -116,9 +134,11 @@ router.post("/new-field", async (req, res) => {
                     mov: subIndicatorSec.mov,
                     query: subIndicatorSec.query,
                     type: subIndicatorSec.type,
-                    key: subIndicatorSec.id,
+                    id: subIndicatorSec.id,
                     pushKey: subIndicatorSecPushKey.key,
-                    path: `${fieldPushKey.key}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator/${subIndicatorSecPushKey.key}`
+                    path: `${areaKey}/indicators/${indicatorPushKey.key}/subIndicator/${subIndicatorPushKey.key}/subIndicator/${subIndicatorSecPushKey.key}`,
+                    status: false,
+                    stage: subIndicatorSec.stage
                   }
                 );
               }

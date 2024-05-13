@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/field-info", async (req, res) => {
   try {
-    const id = req.query.id; // Access id from query parameters
+    const id = req.query.pushKey; // Access id from query parameters
     if (!id) {
       return res.status(400).json({ message: "ID parameter missing" });
     }

@@ -5,11 +5,12 @@ interface RadioProps {
   disabled?: boolean;
   children: React.ReactNode;
   value: string;
+  style?: React.CSSProperties | undefined
 }
 
-const Radio = ({disabled, children,value}: RadioProps) => {
+const Radio = ({disabled, children,value,style}: RadioProps) => {
   return (
-    <GenRadio disabled={disabled} value={value}>{children}</GenRadio>
+    <GenRadio style={style} disabled={disabled} value={value}>{children}</GenRadio>
   )
 }
 

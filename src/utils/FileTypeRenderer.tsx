@@ -28,7 +28,7 @@ const FileTypeRenderer = ({ type }: FileProps) => {
       return (
         <Tooltip
           
-          title="Any file type can be submit to this indicator as MOV"
+          title="A file type can be submit to this indicator as MOV"
         >
           <FaBorderAll />
         </Tooltip>

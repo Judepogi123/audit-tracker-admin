@@ -3,13 +3,9 @@ interface MunicipalitiesProps {
   zipCode: number;
 }
 
-import { OptionProps } from "antd/es/select";
 
 export const handleManString = (value: string, data: string, index: number) => {
-    console.log("value", value);
-    console.log("data", data);
-    console.log("index", index);
-  
+
     const temp: string[] | undefined = value.split(":");
   
     if (index === 1) {   
@@ -17,8 +13,6 @@ export const handleManString = (value: string, data: string, index: number) => {
       console.log("result", newTemp);
       return newTemp.toString();
     }else if (index === 2) {  
-      console.log("Not");
-        
       const newTemp = temp[0] + ":" + temp[1]  + ":" + (temp[index] = data)
       console.log("result", newTemp);
       return newTemp;

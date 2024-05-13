@@ -22,6 +22,7 @@ interface PopoverProps {
     | "bottom"
     | "bottomRight"
     | undefined;
+    style?: React.CSSProperties | undefined
 }
 
 const Popover = ({
@@ -32,9 +33,12 @@ const Popover = ({
   trigger,
   onOpenChange,
   placement,
+  style
 }: PopoverProps) => {
   return (
     <GenPopover
+    
+    style={style}
       placement={placement}
       onOpenChange={onOpenChange}
       trigger={trigger}

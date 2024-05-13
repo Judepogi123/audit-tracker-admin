@@ -16,6 +16,7 @@ import Button from "../../../../../components/Button";
 import Input from "../../../../../components/Input";
 
 import { requirementConditions } from "./dataSourse";
+import { FieldProps } from "../../../../../interface/manage";
 
 import { Typography } from "antd";
 
@@ -43,17 +44,9 @@ interface IndicatorsProps {
   subIndicator?: IndicatorsProps[];
   stage: number;
   status: boolean;
+  marked: boolean
 }
 
-interface FieldProps {
-  id: string;
-  title: string;
-  type: string;
-  dependencies: { method: string; value: number };
-  description: string;
-  requirements: RequirementsProp[];
-  indicators: IndicatorsProps[];
-}
 
 interface RequirementsProps {
   field: FieldProps;
@@ -62,8 +55,6 @@ interface RequirementsProps {
 
 const Requirements = ({ field, setField }: RequirementsProps) => {
   const newField = field.indicators.filter((item) => item.query !== "");
-
-  console.log(field);
 
   const handleFilterExistingRequirements = () => {
     if (!newField) return;
@@ -108,34 +99,6 @@ const Requirements = ({ field, setField }: RequirementsProps) => {
       (_, i) => i !== index
     );
     setField({ ...field, requirements: updatedRequirements });
-  };
-
-  const handleChangeCheckState = (
-    index: number,
-    id: string,
-    query: string,
-    status: boolean
-  ) => {
-    if (!field || !Array.isArray(field.requirements)) return;
-
-    const newField = field.requirements.map((item, i) => {
-      if (i === index && item.value) {
-        const matchedIndex = item.value.findIndex((item) => item.id === id);
-
-        if (matchedIndex !== -1) {
-          item.value[matchedIndex].status = !status;
-        } else {
-          item.value.push({
-            id: id,
-            query: query,
-            status: true,
-          });
-        }
-      }
-      return item;
-    });
-
-    setField({ ...field, requirements: newField });
   };
 
   const handleWatchRequirementsValue = (index: number, id: string): boolean => {

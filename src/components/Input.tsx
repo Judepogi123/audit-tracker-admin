@@ -15,8 +15,19 @@ type InputProps = {
   suffix?: React.ReactNode;
   style?: React.CSSProperties | undefined;
   value?: string | number;
-  disabled?: boolean
+  disabled?: boolean,
+  name?: string
+  type?:string
 };
+
+interface UserDataProps {
+  username: string;
+  password: string;
+  assignedMunicipal: string;
+  type: string;
+  adminType?: string;
+  authority: string;
+}
 
 export default function Input({
   size,
@@ -26,10 +37,12 @@ export default function Input({
   suffix,
   style,
   value,
-  disabled
+  disabled,
+  name,type
 }: InputProps) {
   return (
     <GenInput
+    type={type}
     disabled={disabled}
       value={value}
       style={style}
@@ -37,6 +50,7 @@ export default function Input({
       variant={variant}
       onChange={onChange}
       placeholder={placeholder}
+      name={name}
     />
   );
 }

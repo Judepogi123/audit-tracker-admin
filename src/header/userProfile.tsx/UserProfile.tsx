@@ -8,6 +8,7 @@ import Button from "../../components/Button";
 
 //provider
 import { useUserData } from "../../provider/DataProvider";
+import { handleSaveLocal } from "../../utils/localStorage";
 
 const UserProfile = () => {
     const navigate = useNavigate()
@@ -15,8 +16,12 @@ const UserProfile = () => {
 
     const userData = useUserData()
 
+    console.log(userData.userPermission);
+    
+
     const handleSignOut = async()=>{
         try {
+          await handleSaveLocal("selectedPath", "/dashboard");
             signOut()
             navigate("/auth/login")
         } catch (error) {
@@ -61,9 +66,9 @@ const UserProfile = () => {
         </div>
         <div style={{ textAlign: "center" }}>
           <Typography.Title level={3}>
-            {userData.userFullname}
+            {userData.userFullName}
           </Typography.Title>
-          <Typography.Text>{userData.userType === "centralAdmin" ? "Admin" : "Admin"}</Typography.Text>
+          <Typography.Text>{userData.userType === "headAdmin" ? "Provincial admin" : "Admin"}</Typography.Text>
         </div>
 
         <Divider/>

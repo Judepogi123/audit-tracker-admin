@@ -1,90 +1,63 @@
-import React, { useState, useId, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as genID } from "uuid";
-import { useDebounce } from "use-debounce";
 import axios from "../../../../../../server/api/axios";
 import { useUserData } from "../../../../../provider/DataProvider";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
+//popup
+import Result from "./Result";
 import MethodItem from "./MethodItem";
 import ConfirmSave from "./ConfirmSave";
 import Requirements from "./Requirements";
 
-import { useNavigate } from "react-router-dom";
-
+//ui
 import { Layout, Typography, message } from "antd";
-
 import Button from "../../../../../components/Button";
 import Input from "../../../../../components/Input";
 import Textarea from "../../../../../components/Textarea";
 import Tooltip from "../../../../../components/Tooltip";
 import Select from "../../../../../components/Select";
 import Modal from "../../../../../components/Modal";
-import Rsults from "../../../../../components/Rsults";
+import Spinner from "../../../../../components/Spinner";
 
+//style
 import "./style.scss";
 import { dataInputMethod, mov } from "./dataSourse";
+
+//utils
 import FileTypeRenderer from "../../../../../utils/FileTypeRenderer";
 import { handleManString } from "../../../../../utils/_global-functions";
+import { handleGenerateDate } from "../../../../../provider/CurrentDateProvider";
+import { handleAuditType } from "../../../../../utils/audit";
 
-import { IoMdAddCircleOutline } from "react-icons/io";
+//icons
 import { VscOpenPreview } from "react-icons/vsc";
-import {
-  PlusOutlined,
-  DeleteOutlined,
-  MinusSquareOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { BsSave } from "react-icons/bs";
 import { MessageInstance } from "antd/es/message/interface";
 
+//interface
+import {
+  FieldProps,
+  IndicatorsProps,
+  DraftedArea,
+} from "../../../../../interface/manage";
+import { useDebounce } from "use-debounce";
 
-interface RequirementsProps {
-  condition: string;
-  value: {id: string, query: string, status: boolean}[];
-}
-
-interface ValueProps {
-  title: string;
-  key: string;
-}
-
-interface IndicatorsProps {
-  dataInputMethod: {
-    type: null | string;
-    value: ValueProps[] | string | number;
-  };
-  query: string;
-  id: string;
-  mov: string;
-  movDueDate: string | undefined | "null";
-  title: string;
-  type: "indicator" | "subIndicator";
-  subIndicator?: IndicatorsProps[];
-  stage: number;
-  status: boolean;
-}
-
-interface FieldProps {
-  id: string;
-  title: string;
-  type: string;
-  dependencies: { method: string; value: number };
-  description: string;
-  requirements: RequirementsProps[];
-  indicators: IndicatorsProps[];
-}
-
-const handleCreateField = () => {
-  const newField: FieldProps = {
-    id: genID(),
-    title: "",
-    type: "",
-    dependencies: {
-      method: "",
-      value: 0,
-    },
-    requirements: [],
-    indicators: [],
-    description: "",
-  };
-  return newField;
+const newField: FieldProps = {
+  id: genID(),
+  title: "",
+  type: "",
+  dependencies: {
+    method: "",
+    value: 0,
+  },
+  requirements: [],
+  indicators: [],
+  description: "",
+  author: "",
+  pushKey: "",
 };
 
 const handleCreatIndicator = (
@@ -103,8 +76,9 @@ const handleCreatIndicator = (
     title: "null",
     type: type,
     subIndicator: [],
-    stage: count,
+    stage: count++,
     status: false,
+    marked: false,
   };
 
   return newIndicator;
@@ -124,21 +98,88 @@ const handleButtonColorProvider = (stage: number) => {
 };
 
 const NewField = () => {
-  const [field, setField] = useState<FieldProps | null>(null);
+  const [field, setField] = useState<FieldProps | null>(newField);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confimnSave, setConfirmnSave] = useState<boolean>(false);
   const [onRequire, setOnRequire] = useState<boolean>(false);
   const [result, setResult] = useState<string | undefined>();
+  const [drafted, setDrafted] = useState<boolean>(true);
 
   const [messageApi, contextHolder] = message.useMessage();
 
+  const { auditID, areaKey } = useParams();
   const navigate = useNavigate();
   const useData = useUserData();
 
+  const link = field?.type === "Editing" ? `/manage/audit-info/${auditID}/area/${field?.pushKey}` : `/manage/audit/${auditID}`;
+  
+  const {
+    data: draftedArea,
+    refetch,
+    isLoading: areaIsLoading,
+  } = useQuery({
+    queryKey: ["draftedArea"],
+    queryFn: () => axios.get("/data/drafted-area", { params: { areaKey } }),
+  });
+
+  const handleSaveDraft = async () => {
+    const stringedData = JSON.stringify(field);
+    const lastSaved: DraftedArea = draftedArea?.data;
+    const date = await handleGenerateDate();
+
+    if (lastSaved.draftedField && lastSaved.draftedField === stringedData) {
+      messageApi.error(`Saved`);
+      return;
+    }
+    try {
+      const response = await axios.post("/data/saved-area-draft", {
+        areaKey: areaKey,
+        draftedField: stringedData,
+        date: date || "Invalid date",
+      });
+      if (response.status === 200) {
+        messageApi.success(`Save draft success`);
+      } else {
+        messageApi.error(`${response.data.message}`);
+      }
+    } catch (error) {
+      messageApi.error(
+        `Sorry something went wrong with saving draft: ${error}`
+      );
+    }
+  };
+
+  const handleMergeData = async () => {
+    try {
+      const lastSaved: DraftedArea = draftedArea?.data;
+      if (!lastSaved) return;
+
+      const draftedField: FieldProps = lastSaved.draftedField
+        ? JSON.parse(lastSaved.draftedField)
+        : [];
+
+      setField((prevField) => {
+        if (!prevField) {
+          return null;
+        }
+        return {
+          ...prevField,
+          title: lastSaved?.title || "",
+          description: lastSaved?.desc || "",
+          indicators: draftedField.indicators || [],
+          type: lastSaved.type,
+          pushKey: draftedField.pushKey
+        };
+      });
+    } catch (error) {
+      console.log(error);
+      messageApi.error(`Sorry something went wrong: ${error}`);
+    }
+  };
+
   useEffect(() => {
-    const newfield = handleCreateField();
-    setField(newfield);
-  }, []);
+    handleMergeData();
+  }, [draftedArea?.data]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (field) {
@@ -153,8 +194,6 @@ const NewField = () => {
       const updatedIndicators = field.indicators
         ? [...field.indicators, newIndicator]
         : [newIndicator];
-
-      // Update the field state with the new array of indicators
       setField({ ...field, indicators: updatedIndicators });
     }
   };
@@ -162,41 +201,29 @@ const NewField = () => {
   const handleRemoveIndicator = (id: string, type: string) => {
     if (!field) return;
 
-    // Clone the current field state
     const newField: FieldProps = { ...field };
 
     const removeIndicatorById = (
       indicators: IndicatorsProps[]
     ): IndicatorsProps[] => {
-      // Create a new array to store the modified indicators
       const newIndicators: IndicatorsProps[] = [];
 
-      // Iterate over the indicators
       for (const indicator of indicators) {
-        // Check if the current indicator matches the specified id
         if (indicator.id === id && indicator.type === type) {
-          // Skip this indicator and its sub-indicators
           continue;
         }
 
-        // Check if the current indicator has sub-indicators
         if (indicator.subIndicator) {
-          // Recursively remove sub-indicators
           indicator.subIndicator = removeIndicatorById(indicator.subIndicator);
         }
 
-        // Add the modified indicator to the new array
         newIndicators.push(indicator);
       }
-
-      // Return the new array of indicators
       return newIndicators;
     };
 
-    // Remove the specified indicator from the indicators list
     newField.indicators = removeIndicatorById(newField.indicators);
 
-    // Update the state with the modified field object
     setField(newField);
   };
 
@@ -266,28 +293,45 @@ const NewField = () => {
 
   const handleSaveNewField = async () => {
     const status = handleValidateField();
-    if (!status) {
+    if (!status || !auditID) {
     }
     setIsLoading(true);
+    const date = await handleGenerateDate();
+    const lastSaved: DraftedArea = draftedArea?.data;
+    const localeType = await handleAuditType(auditID as string);
+    const link = field?.type === "Editing" ? `/manage/audit-info/${auditID}/area/${areaKey}` : `/manage/audit/${auditID}`;
     try {
       const response = await axios.post("/data/new-field", {
         ...field,
         authorUsername: useData.userName,
-        authorFullname: useData.userFullname,
+        authorFullname: useData.userFullName,
+        date: date,
+        auditKey: auditID,
+        areaKey: lastSaved.areaKey,
+        localeType: localeType,
       });
-      if (response.data) {
+      if (response.status === 200) {
         setResult(response.data.message);
         setIsLoading(false);
         setConfirmnSave(false);
         setField(null);
       }
     } catch (error) {
-      messageApi.error(`Sorry, something went wrong; ${error}`)
+      messageApi.error(`Sorry, something went wrong; ${error}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (areaIsLoading) {
+    return (
+      <Layout style={{ width: "100%", height: "100%", display: "grid" }}>
+        <div style={{ margin: "auto" }}>
+          <Spinner size="large" />
+        </div>{" "}
+      </Layout>
+    );
+  }
 
   return (
     <Layout
@@ -301,9 +345,23 @@ const NewField = () => {
     >
       {contextHolder}
       <div className="field-header">
-        <Typography.Title level={3}>Add new field</Typography.Title>
-        <div style={{ cursor: "pointer" }}>
-          <VscOpenPreview fontSize={30} />
+        <Typography.Title level={3}>
+          {field?.type === "New" ? "Add new" : "Update"} field
+        </Typography.Title>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <div>
+            <Button
+              onClick={handleSaveDraft}
+              style={{ backgroundColor: drafted ? "" : "#48cae4" }}
+            >
+              <BsSave />
+            </Button>
+          </div>
+          <div style={{ cursor: "pointer" }}>
+            <Button>
+              <VscOpenPreview />
+            </Button>
+          </div>
         </div>
       </div>
       <div className="new-field-content">
@@ -320,6 +378,7 @@ const NewField = () => {
             Title:{" "}
           </Typography.Title>
           <Input
+            value={field?.title}
             onChange={handleTitleChange}
             size="small"
             placeholder={"Field title here"}
@@ -338,6 +397,7 @@ const NewField = () => {
             Descriptions:{" "}
           </Typography.Title>
           <Textarea
+            value={field?.description}
             onChange={(e) => handleEditDescription(e)}
             style={{ maxHeight: "100px" }}
             placeholder={"Field description here (Optional)"}
@@ -365,6 +425,7 @@ const NewField = () => {
             {field?.indicators &&
               field.indicators.map((item, index) => (
                 <IndicatorField
+                  key={index}
                   messageApi={messageApi}
                   item={item}
                   index={index}
@@ -384,7 +445,7 @@ const NewField = () => {
         </div>
       </div>
       <div className="field-footer">
-        <Button onClick={() => navigate("/manage/update-audit")}>Cancel</Button>
+        <Button onClick={() => history.back()}>Cancel</Button>
         <Button
           loading={isLoading}
           onClick={handleValidateField}
@@ -404,7 +465,8 @@ const NewField = () => {
         setCloseModal={() => setConfirmnSave(false)}
       />
       <Modal
-      style={{maxHeight: "600px"}}
+      okHid={true}
+        style={{ maxHeight: "600px" }}
         width={800}
         children={
           <Requirements setField={setField} field={field as FieldProps} />
@@ -412,33 +474,15 @@ const NewField = () => {
         openModal={onRequire}
         setCloseModal={() => setOnRequire(false)}
       />
-      {result === "success" && (
-        <Rsults
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            margin: "auto",
-            width: "600px",
-            height: "400px",
-            backgroundColor: "#fff",
-            boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-            borderRadius: "5px",
-            textAlign: "center",
-            lineHeight: "100px",
-          }}
-          status={"success"}
-          title="Successfully added new field."
-          subTitle="You can now view the created field to the Audit info."
-          extra={[
-            <Button onClick={() => navigate("/manage/update-audit")}>
-              Back to the field list
-            </Button>,
-          ]}
-        />
-      )}
+
+      <Modal
+      width={650}
+      okHid={true}
+      cancelHid={true}
+        children={<Result link={link} setResult={setResult} />}
+        openModal={result === "success"}
+        setCloseModal={() => setResult(undefined)}
+      />
     </Layout>
   );
 };
@@ -460,6 +504,27 @@ const IndicatorField = ({
   setField: React.Dispatch<React.SetStateAction<FieldProps | null>>;
   messageApi: MessageInstance;
 }) => {
+  //const { text, debouncedText, handleTextChange } = useDebouncedText(500);
+  const [text, setText] = useState<string>("");
+  const [debouncedText] = useDebounce(text, 1000);
+
+  const handleGetMethodTypeString = (value: string | null) => {
+    if (!value) return;
+    try {
+      if (value === "radio_button" || value === "check_box") {
+        return value;
+      } else if (value === "null") {
+        return value;
+      } else if (value.includes("str")) {
+        return "str";
+      } else if (value.includes("num")) {
+        return "num";
+      } else if (value.includes("date")) {
+        return "date";
+      }
+    } catch (error) {}
+  };
+
   const handleChangeMethodType = (
     id: string,
     value: string,
@@ -573,6 +638,7 @@ const IndicatorField = ({
     editValueTitle(newField.indicators);
     setField(newField);
   };
+  
 
   const handleEditQuery = (
     id: string,
@@ -581,27 +647,22 @@ const IndicatorField = ({
   ) => {
     if (!field) return;
 
-    // Clone the current field state
     const newField: FieldProps = { ...field };
 
     const editIndicatorQuery = (indicators: IndicatorsProps[]): void => {
       for (const indicator of indicators) {
         if (indicator.id === id && indicator.type === type) {
-          // Update the query of the matching indicator
-          indicator.query = e.target.value;
+          indicator.query = e.target.value
           return;
         }
-        // If the indicator has sub-indicators, recursively call this function
         if (indicator.subIndicator) {
           editIndicatorQuery(indicator.subIndicator);
         }
       }
     };
 
-    // Call the helper function to edit the query
     editIndicatorQuery(newField.indicators);
-
-    // Update the state with the modified field object
+    
     setField(newField);
   };
 
@@ -616,9 +677,7 @@ const IndicatorField = ({
           indicator.type === type &&
           Array.isArray(indicator.dataInputMethod.value)
         ) {
-          // Push a new option to the array of values
           indicator.dataInputMethod.value.push({ title: "", key: genID() });
-          // Update the field state
           setField({ ...newField });
           return;
         }
@@ -696,7 +755,6 @@ const IndicatorField = ({
     const updateMethodType = (indicators: IndicatorsProps[]) => {
       for (const indicator of indicators) {
         if (indicator.id === id && indicator.dataInputMethod.type) {
-
           indicator.dataInputMethod.type = handleManString(
             indicator.dataInputMethod.type,
             data,
@@ -816,7 +874,8 @@ const IndicatorField = ({
             Data Input Method:
           </Typography.Text>
           <Select
-          size="small"
+            value={handleGetMethodTypeString(item.dataInputMethod.type)}
+            size="small"
             defaultValue="null"
             onChange={(value: string) =>
               handleChangeMethodType(item.id, value, item.dataInputMethod.type)
@@ -847,7 +906,8 @@ const IndicatorField = ({
             Means of Verification:
           </Typography.Text>
           <Select
-          size="small"
+          value={item.mov}
+            size="small"
             defaultValue="null"
             onChange={(value: string) => handleChangeMov(item.id, value)}
             style={{ width: "200px" }}

@@ -15,11 +15,13 @@ interface TabsProps {
   items?: Tab[] | undefined;
   onChange?: (activeKey: string) => void | undefined;
   defaultActiveKey?: string | undefined
+  style?: React.CSSProperties | undefined;
+  activeKey?: string | undefined
 }
 
-const Tabs = ({ position, items,onChange,defaultActiveKey }: TabsProps) => {
+const Tabs = ({ position, items,onChange,defaultActiveKey,style,activeKey}: TabsProps) => {
   return (
-    <GenTabs style={{overflow: "auto"}} defaultActiveKey={defaultActiveKey} tabPosition={position} items={items} onChange={onChange} />
+    <GenTabs activeKey={activeKey} style={style} defaultActiveKey={defaultActiveKey} tabPosition={position} items={items} onChange={onChange} />
   );
 };
 

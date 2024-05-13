@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter,ScrollRestoration, useLocation,} from "react-router-dom";
 
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 import SystemDataProvider from "./provider/SystemDataProvider.tsx";
+import NetworkStatus from "./provider/NetworkStatus.tsx";
 
 import App from "./App.tsx";
 import "./index.css";
@@ -27,6 +28,7 @@ const store = createStore({
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
+
   <React.StrictMode>
     <AuthProvider store={store}>
       <QueryClientProvider client={queryClient}>

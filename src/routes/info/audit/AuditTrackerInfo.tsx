@@ -14,6 +14,7 @@ import ArchiveField from "./ArchiveField";
 
 import { handleArchiveField } from "./_server/_handleArchive";
 import { formattedDate } from "../../../provider/DateProvider";
+import { convertToArrays } from "../../../pages/manage-users/_sglg/update/_functions";
 
 interface RequirementsProps {
   condition: string;
@@ -39,6 +40,7 @@ interface IndicatorsProps {
   subIndicator?: IndicatorsProps[];
   stage: number;
   status: boolean;
+  marked: boolean;
 }
 
 interface RequirementsProps {
@@ -55,6 +57,7 @@ interface FieldProps {
   requirements: RequirementsProps[];
   indicators: IndicatorsProps[];
   pushKey: string;
+  timestamp: string;
 }
 
 interface HoverIDProps {
@@ -65,18 +68,22 @@ const AuditTrackerInfo = () => {
   const [currentField, setCurrrentField] = useState<FieldProps | null>(null);
   const [hoverID, setHoverID] = useState<HoverIDProps | undefined>(undefined);
   const [archiveField, setArchiveField] = useState<boolean>(false);
+  const [onUpdate, setOnUpdate] = useState<boolean>(false);
   const [archiveFieldLoading, setArchiveFieldLoading] =
     useState<boolean>(false);
   const [archiveFieldStatus, setArchiveFieldStatus] = useState<{
     message: string;
     status: string;
   } | null>(null);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { fieldID } = useParams();
+  const { auditID, fieldID } = useParams();
 
   const navigate = useNavigate();
+
+  console.log(currentField);
 
   const handleHoverEnter = (
     id: string,
@@ -89,22 +96,17 @@ const AuditTrackerInfo = () => {
     }
   };
 
-  const handleHoverLeave = () => {
-    setHoverID({ id: null });
-  };
-
   const handleGetCurrentField = async () => {
     setIsLoading(true);
     try {
       const request = await axios.get(`/data/field-info`, {
         params: {
-          id: fieldID,
+          pushKey: fieldID,
         },
       });
       if (request.data) {
         setCurrrentField(request.data);
         setIsLoading(false);
-        console.log(request.data);
       }
     } catch (error) {
       console.log("Jude eerror", error);
@@ -124,12 +126,44 @@ const AuditTrackerInfo = () => {
     setArchiveFieldLoading(true);
     try {
       await handleArchiveField(fieldID, setArchiveFieldStatus, formattedDate);
-      setArchiveField(false)
+      setArchiveField(false);
       if (archiveFieldStatus?.status === "success") {
         setArchiveField(false);
       }
     } catch (error) {
       messageApi.error(`${error}`);
+    }
+  };
+
+  const handleUpdate = () => {
+    setOnUpdate(false);
+  };
+
+  const handelSaveUpdate = async () => {
+    try {
+      const dataCopy = { ...currentField };
+      const indicators = convertToArrays(
+        dataCopy?.indicators as IndicatorsProps[]
+      );
+
+      if (!currentField) return;
+
+      const response = await axios.post("/data/new-area", {
+        areaKey: currentField.pushKey,
+        auditID: auditID,
+        date: currentField?.timestamp,
+        title: currentField?.title,
+        description: currentField?.description,
+        draftedField: { ...currentField, indicators: indicators },
+      });
+      if (response.status === 200) {
+        navigate(`/manage/audit/${auditID}/new-area/${fieldID}`);
+      } else {
+        messageApi.error(`Sorry something navigating page.`);
+      }
+    } catch (error) {
+      console.log(error);
+      messageApi.error(`Sorry something went wrong: ${error}`);
     }
   };
 
@@ -186,9 +220,7 @@ const AuditTrackerInfo = () => {
               gap: "5px",
             }}
           >
-            <Typography.Title level={4}>
-              {currentField?.title} {hoverID?.id}
-            </Typography.Title>
+            <Typography.Title level={4}>{currentField?.title}</Typography.Title>
             <div style={{ padding: "5px" }}>
               <EditOutlined style={{ fontSize: "1.2rem", cursor: "pointer" }} />
             </div>
@@ -206,15 +238,18 @@ const AuditTrackerInfo = () => {
             </Typography.Paragraph>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+              padding: "4px 8px",
+            }}
+          >
             {currentField?.indicators &&
-              Object.values(currentField.indicators).map((indicator) => (
+              Object.values(currentField.indicators).map((indicator, index) => (
                 <div
                   key={indicator.key}
-                  onMouseEnter={(event) =>
-                    handleHoverEnter(indicator.key, event)
-                  }
-                  onMouseLeave={handleHoverLeave}
                   style={{
                     cursor: "pointer",
                     border:
@@ -224,109 +259,146 @@ const AuditTrackerInfo = () => {
                 >
                   <div>
                     <div
-                      style={{ width: "100%", height: "auto", padding: "10px" }}
+                      style={{ width: "100%", height: "auto", padding: "8px" }}
                     >
-                      <Typography.Title
-                        level={5}
+                      <Typography.Paragraph
                         style={{
                           color: hoverID?.id === indicator.key ? "#c1121f" : "",
                         }}
                       >
-                        {indicator.query}
-                      </Typography.Title>
+                        {index + 1}. {indicator.query}
+                      </Typography.Paragraph>
                     </div>
-                    <IndicatorValue value={indicator.dataInputMethod.value} />
+                    {indicator.dataInputMethod.type === "null" ? (
+                      <Typography
+                        style={{ fontWeight: 300, fontSize: ".8rem" }}
+                      >
+                        (Data input not applicable)
+                      </Typography>
+                    ) : (
+                      <IndicatorValue
+                        type={indicator.dataInputMethod.type as string}
+                        value={indicator.dataInputMethod.value}
+                      />
+                    )}
                   </div>
 
                   <div>
                     {indicator.subIndicator &&
-                      Object.values(indicator.subIndicator).map((item) => (
-                        <div
-                          onMouseEnter={(event) =>
-                            handleHoverEnter(item.key, event)
-                          }
-                          onMouseLeave={handleHoverLeave}
-                          style={{
-                            width: "100%",
-                            height: "auto",
-                            padding: "0px 20px",
-                            border:
-                              hoverID?.id === item.key ? "1px solid #ccc" : "",
-                            borderRadius: "5px",
-                          }}
-                        >
-                          <div>
-                            <div>
-                              <Typography
-                                style={{
-                                  color:
-                                    hoverID?.id === item.key ? "#c1121f" : "",
-                                }}
-                              >
-                                {item.query}
-                              </Typography>
-                              <IndicatorValue
-                                value={item.dataInputMethod.value}
-                              />
-                            </div>
-                          </div>
-
+                      Object.values(indicator.subIndicator).map(
+                        (item, subIndex) => (
                           <div
                             style={{
                               width: "100%",
                               height: "auto",
-                              display: "flex",
-                              flexDirection: "column",
+                              padding: "0px 20px",
+                              border:
+                                hoverID?.id === item.key
+                                  ? "1px solid #ccc"
+                                  : "",
+                              borderRadius: "5px",
                             }}
                           >
-                            {item.subIndicator &&
-                              Object.values(item.subIndicator).map((sub) => (
-                                <div
-                                  onMouseEnter={(event) =>
-                                    handleHoverEnter(sub.key, event)
-                                  }
-                                  onMouseLeave={handleHoverLeave}
+                            <div>
+                              <div>
+                                <Typography
                                   style={{
-                                    width: "100%",
-                                    height: "auto",
-                                    padding: "0px 20px",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    border:
-                                      hoverID?.id === sub.key
-                                        ? "1px solid #ccc"
-                                        : "",
-                                    borderRadius: "5px",
+                                    color:
+                                      hoverID?.id === item.key ? "#c1121f" : "",
                                   }}
                                 >
-                                  <div>
+                                  {index + 1}.{subIndex + 1} {item.query}
+                                </Typography>
+                                {item.dataInputMethod.type === "null" ? (
+                                  <Typography
+                                    style={{
+                                      fontWeight: 300,
+                                      fontSize: ".8rem",
+                                    }}
+                                  >
+                                    (Data input not applicable)
+                                  </Typography>
+                                ) : (
+                                  <IndicatorValue
+                                    type={item.dataInputMethod.type as string}
+                                    value={item.dataInputMethod.value}
+                                  />
+                                )}
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                width: "100%",
+                                height: "auto",
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
+                              {item.subIndicator &&
+                                Object.values(item.subIndicator).map(
+                                  (sub, subSubIndex) => (
                                     <div
                                       style={{
                                         width: "100%",
                                         height: "auto",
                                         padding: "0px 20px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        border:
+                                          hoverID?.id === sub.key
+                                            ? "1px solid #ccc"
+                                            : "",
+                                        borderRadius: "5px",
                                       }}
                                     >
-                                      <Typography
-                                        style={{
-                                          color:
-                                            hoverID?.id === sub.key
-                                              ? "#c1121f"
-                                              : "",
-                                        }}
-                                      >
-                                        {sub.query}
-                                      </Typography>
-                                      <IndicatorValue
-                                        value={sub.dataInputMethod.value}
-                                      />
+                                      <div>
+                                        <div
+                                          style={{
+                                            width: "100%",
+                                            height: "auto",
+                                            padding: "0px 20px",
+                                          }}
+                                        >
+                                          <Typography
+                                            style={{
+                                              color:
+                                                hoverID?.id === sub.key
+                                                  ? "#c1121f"
+                                                  : "",
+                                            }}
+                                          >
+                                            {index + 1}.{subIndex + 1}.
+                                            {subSubIndex + 1} {sub.query}
+                                          </Typography>
+                                          {sub.dataInputMethod.type ===
+                                          "null" ? (
+                                            <Typography
+                                              style={{
+                                                fontWeight: 300,
+                                                fontSize: ".8rem",
+                                              }}
+                                            >
+                                              (Data input not applicable)
+                                            </Typography>
+                                          ) : (
+                                            <IndicatorValue
+                                              type={
+                                                sub.dataInputMethod
+                                                  .type as string
+                                              }
+                                              value={sub.dataInputMethod.value}
+                                            />
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
-                                  </div>
-                                </div>
-                              ))}
+                                  )
+                                )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                   </div>
                 </div>
               ))}
@@ -342,44 +414,52 @@ const AuditTrackerInfo = () => {
             <div
               style={{ width: "100%", height: "auto", display: "grid" }}
             ></div>
-            <div>
-              <Button onClick={() => setArchiveField(true)}>
-                Archive field
-              </Button>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Button onClick={() => setOnUpdate(true)}>Update</Button>
             </div>
           </div>
-          <Modal
-          width={400}
-          loading={archiveFieldLoading}
-            onFunction={handleFieldArchive}
-            children={<ArchiveField  dataID={fieldID} />}
-            openModal={archiveField}
-            setCloseModal={() => setArchiveField(false)}
-          />
         </>
       )}
+      <Modal
+        onFunction={handelSaveUpdate}
+        title={`Update ${currentField?.title}?`}
+        width={500}
+        children={""}
+        openModal={onUpdate}
+        setCloseModal={handleUpdate}
+      />
     </Layout>
   );
 };
 
 export default AuditTrackerInfo;
 
-const IndicatorValue = ({ value }: { value: string }) => {
+const IndicatorValue = ({ value, type }: { value: string; type: string }) => {
   if (!value) return;
-  const temp: { title: string; key: string }[] = JSON.parse(value);
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "5px",
-        padding: "5px 20px",
-      }}
-    >
-      {Object.values(temp).map((item) => (
-        <Typography>{item.title}</Typography>
-      ))}
-    </div>
-  );
+  if (type === "check_box" || type === "radio_button") {
+    const temp: { title: string; key: string }[] = JSON.parse(value);
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "5px",
+          padding: "5px 20px",
+        }}
+      >
+        {Object.values(temp).map((item, index) => (
+          <Typography key={index}>{item.title}</Typography>
+        ))}
+      </div>
+    );
+  }
+  if (type === "str" || type.includes("num") || type === "date") {
+    return (
+      <Typography>
+        {type === "str" ? `Take text as response` : type === "num"}
+      </Typography>
+    );
+  }
 };

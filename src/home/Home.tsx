@@ -7,12 +7,8 @@ import { Layout } from "antd";
 import SideBar from "../side-bar/SideBar";
 import Header from "../header/Header";
 
-import { useUserData } from "../context/UserDataContext";
-
-import DataProvider from "../provider/DataProvider";
 
 const Home = () => {
-  const [minimize, setMinimize] = useState<true | false>(false);
   
   return (
     <Layout style={{ widows: "100%", height: "100dvh", display: "flex", position: "relative" }}>

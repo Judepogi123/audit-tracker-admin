@@ -16,13 +16,20 @@ interface SelectProps {
   onChange?: (value: string)=> void 
   style?: React.CSSProperties;
   value?:  string | null | undefined,
-  size: SizeType
+  size: SizeType,
+  loading?:boolean | undefined
+  placeholder?: string
+  disabled?: boolean
 }
 
-const Select = ({ defaultValue, options, onChange, style,value,size }: SelectProps) => {
+const Select = ({ defaultValue, options, onChange, style,value,size,loading,placeholder,disabled }: SelectProps) => {
 
   return (
     <GenSelect
+
+    disabled={disabled}
+    placeholder={placeholder}
+    loading={loading}
     size={size}
     value={value}
     defaultValue={defaultValue}

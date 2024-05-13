@@ -5,11 +5,12 @@ interface SpinProps {
     tip?: string;
     size?: "small" | "large" | "default" | undefined;
     spinning?: boolean
+    style?: React.CSSProperties | undefined
 }
 
-const Spinner = ({tip, size, spinning}: SpinProps) => {
+const Spinner = ({tip, size, spinning,style}: SpinProps) => {
   return (
-    <Spin tip={tip} size={size} spinning={spinning}/>
+    <Spin style={style} tip={tip} size={size} spinning={spinning}/>
   )
 }
 

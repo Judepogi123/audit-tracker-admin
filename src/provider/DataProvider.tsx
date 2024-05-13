@@ -14,10 +14,11 @@ interface UserProps {
   userName: string;
   profilePicture: string;
   userType: string;
-  userFullname: string;
+  userFullName: string;
   userZoneId: number;
   userAddress: string;
-history: any
+  history: any;
+  userPermission: string
 }
 
 interface ProviderProps {
@@ -34,13 +35,12 @@ export const DataProvider = ({ children }: ProviderProps) => {
 
   const auth = useAuthUser() as User;
 
-
   const handleFetchData = async () => {
     const username = auth.name;
     try {
       const response = await axios.get(`/auth/user-data?username=${username}`);
-      
-      if(response.status === 200 && response.data){
+
+      if (response.status === 200 && response.data) {
         console.log(response.data);
         setUserData(response.data);
       } else {
@@ -56,18 +56,18 @@ export const DataProvider = ({ children }: ProviderProps) => {
     return () => setUserData(null);
   }, []);
 
-  if(!userData){
+  if (!userData) {
     return (
-      <Layout style={{width: "100%", height: "100vh", display: "grid"}}>
-        <div style={{margin: "auto"}}>
-          <Spinner/>
+      <Layout style={{ width: "100%", height: "100vh", display: "grid" }}>
+        <div style={{ margin: "auto" }}>
+          <Spinner />
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
-    <DataMainProvider.Provider value={{...userData,history}}>
+    <DataMainProvider.Provider value={{ ...userData, history }}>
       {userData && children}
     </DataMainProvider.Provider>
   );
@@ -82,4 +82,3 @@ export const useUserData = () => {
 };
 
 export default DataProvider;
-

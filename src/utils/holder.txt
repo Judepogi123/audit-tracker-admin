@@ -1,0 +1,18 @@
+  // const hanldeWatchDraft = ()=>{
+  //   try {
+  //     const stringField = JSON.stringify(newField)
+  //     const stringedData = JSON.stringify(field)
+  //     const lastSaved: DraftedArea = draftedArea?.data;
+  //     if(lastSaved.draftedField && lastSaved.draftedField !== stringedData){
+  //       setDrafted(false)
+  //     }else if(!lastSaved.draftedField && stringedData !== stringField){
+  //       setDrafted(false)
+  //     }
+  //   } catch (error) {
+      
+  //   }
+  // }
+
+  // useEffect(()=>{
+  //   hanldeWatchDraft()
+  // },[field, draftedArea?.data])

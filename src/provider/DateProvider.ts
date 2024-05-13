@@ -1,3 +1,4 @@
+
 function getCurrentDateFormatted(): string {
     const months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentDate: Date = new Date();
@@ -14,4 +15,3 @@ function getCurrentDateFormatted(): string {
 
 // Example usage:
 export const formattedDate: string = getCurrentDateFormatted();
-

@@ -35,4 +35,33 @@
 
 .system-title-edit {
   cursor: pointer;
+}
+
+#auditItem:hover {
+  background-color: #ade8f4;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+#auditList::-webkit-scrollbar-track {
+  width: 8px;
+}
+
+#auditList::-webkit-scrollbar-thumb {
+  background-color: #adb5bd;
+}
+
+#auditList::-webkit-scrollbar-thumb:hover {
+  background-color: #dee2e6;
+}
+
+#auditList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.auditItem {
+  background-color: aqua;
+}
+
+.auditItem:hover {
+  background-color: #ade8f4;
 }/*# sourceMappingURL=style.css.map */

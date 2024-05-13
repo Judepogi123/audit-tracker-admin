@@ -11,11 +11,11 @@ import Users from "./_users/Users";
 import AdminLogs from "./_logs/AdminLogs";
 import Files from "./files/Files";
 import Archive from "./archive/Archive";
+import Audits from "./_sglg/Audits";
 
 const tablists = [
   { label: "Audit", key: "audit" },
   { label: "Users", key: "users" },
-  { label: "Files", key: "files" },
   { label: "Archived", key: "archive" },
   { label: "Activity Logs", key: "logs" },
 ];
@@ -38,17 +38,15 @@ const ManageUsers = () => {
   const handleRenderTab = (value: string) => {
     switch (value) {
       case "audit":
-        return <System />;
+        return <Audits />;
       case "users":
         return <Users />;
       case "logs":
         return <AdminLogs />;
       case "archive":
         return <Archive/>
-      case "files":
-        return <Files/>
       default:
-        return <System />;
+        return <Audits />;
     }
   };
 

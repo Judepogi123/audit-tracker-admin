@@ -24,11 +24,7 @@ export const dataInputMethod = [
 ];
 export const mov = [
   { value: "null", label: "None" },
-  { value: "any", label: "Any" },
-  { value: "pdf", label: "PDF" },
-  { value: "docs", label: "Docs" },
-  { value: "excel", label: "Excel" },
-  { value: "pic", label: "Image" },
+  { value: "any", label: "Files" },
 ];
 
 export const requirementConditions = [

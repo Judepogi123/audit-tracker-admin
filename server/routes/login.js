@@ -6,6 +6,7 @@ import { getDoc, doc } from "firebase/firestore";
 
 import argon from "argon2";
 import jwt from "jsonwebtoken";
+//import { redis } from "../api/redis.js";
 
 router.use(express.json());
 
