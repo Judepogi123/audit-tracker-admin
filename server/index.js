@@ -38,17 +38,11 @@ import archive from "./routes/update/archiveArea.js";
 const port = 3000;
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server);
 
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-io.on("connection", (socket) => {
-  console.log("a user connected", socket);
-});
 
 app.use("/system", systemData);
 app.use("/auth", login);
