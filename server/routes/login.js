@@ -1,16 +1,14 @@
 import express from "express";
 const router = express.Router();
 
-import { firestore } from "../../firebase/dbConfig.js";
-import { getDoc, doc } from "firebase/firestore";
+import { firestore,getDoc,doc} from "../../firebase/dbConfig.js";
 
 import argon from "argon2";
 import jwt from "jsonwebtoken";
-//import { redis } from "../api/redis.js";
 
 router.use(express.json());
 
-const jwtSecrect =
+const jwtSecret =
   "84b84c3ee0d05ed64cc56d89dd9f80a6fba0c5fde53dc399a48dfb6629ada8ba69d5eb1b8c61cc18e442534e0d3b495a1f1f5e70ecbb05f80e0e4e30524750b1";
 
 const handleGetUser = async (username, password) => {
@@ -19,16 +17,20 @@ const handleGetUser = async (username, password) => {
     const userDocSnapshot = await getDoc(userDoc);
 
     if (userDocSnapshot.exists()) {
-      const userName = userDocSnapshot.data().userName;
-      const storedHashedPassword = userDocSnapshot.data().userPassword;
-      const passwordMatch = await argon.verify(storedHashedPassword, password); // Correct order
-
-      const token = jwt.sign({ userName: userName }, jwtSecrect, {
-        expiresIn: "1h",
-      });
+      const userData = userDocSnapshot.data();
+      if (!userData) {
+        return "invalidUsername";
+      }
+      
+      const userName = userData.userName;
+      const storedHashedPassword = userData.userPassword;
+      const passwordMatch = await argon.verify(storedHashedPassword, password);
 
       if (passwordMatch) {
-        return { username: userDocSnapshot.data().userName, token };
+        const token = jwt.sign({ userName: userName }, jwtSecret, {
+          expiresIn: "1h",
+        });
+        return { username: userName, token };
       } else {
         return "wrongPassword";
       }
@@ -46,16 +48,24 @@ router.post("/login", async (req, res) => {
   try {
     const loginStatus = await handleGetUser(username, password);
 
-    if (loginStatus) {
-      const { username, token } = loginStatus;
-      res
-        .status(200)
-        .json({ message: "success", username: username, token: token });
-    } else {
-      res.status(401).send(loginStatus);
+    if (loginStatus === "invalidUsername") {
+      res.status(200).json({ message: "Invalid username", status: false,target: "username" });
+      return;
     }
+    if (loginStatus === "wrongPassword") {
+      res.status(200).json({ message: "Incorrect password", status: false, target: "password" });
+      return;
+    }
+    if (!loginStatus) {
+      res.status(200).json({ message: "Unknown error", status: false });
+      return;
+    }
+
+    const { username: validUsername, token } = loginStatus;
+    res.status(200).json({ message: "Success", username: validUsername, token: token });
+
   } catch (error) {
-    res.status(200).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 

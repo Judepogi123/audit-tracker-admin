@@ -38,7 +38,7 @@ interface ListProps {
   currentArea: string | null;
   currentLocale: string | null;
   currentStatus: string | null
-  query: string
+  query: string;
 }
 
 const List = ({
@@ -49,7 +49,8 @@ const List = ({
   currentArea,
   currentLocale,
   currentStatus,
-  query
+  query,
+
 }: ListProps) => {
   const [dataList, setDataList] = useState<ComplianceDataProps[]>([]);
   
@@ -100,7 +101,7 @@ const List = ({
 
   useEffect(() => {
     handleGetLocalData();
-  }, []);
+  }, [complianceList?.data]);
 
   const handleUpdateCheckBy = async (list: string) => {
     try {

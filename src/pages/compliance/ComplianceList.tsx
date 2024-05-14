@@ -15,6 +15,7 @@ import Select from "../../components/Select";
 import ErrorPage from "../error_page/ErrorPage";
 import { Typography } from "antd";
 import { TabsProps, message } from "antd";
+import Lottie from "lottie-react";
 
 //interface
 import {
@@ -33,6 +34,7 @@ import { handleSaveLocal, handleGetLocal } from "../../utils/localStorage";
 
 //icons
 import { TbZoomReset } from "react-icons/tb";
+import loading from "../../assets/animations/loading-001.json";
 
 const statusList: { value: string; label: string }[] = [
   { value: "all", label: "All" },
@@ -52,17 +54,16 @@ const ComplianceList = () => {
     locale: "all",
     area: "all",
     status: "all",
-    query: ""
+    query: "",
   });
   const currentAudit = searchParams.get("audit");
   const currentStatus = searchParams.get("status") || "all";
   const currentLocale = searchParams.get("locale") || "all";
   const currentArea = searchParams.get("area") || "all";
-  const currentQuery = searchParams.get("query") || ""
+  const currentQuery = searchParams.get("query") || "";
 
-  const [query] = useDebounce(currentQuery, 500)
-  console.log(query);
-  
+  const [query] = useDebounce(currentQuery, 1000);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const handleChangePath = (value: string) => {
     setSearchParams(
@@ -95,7 +96,6 @@ const ComplianceList = () => {
       },
       { replace: true }
     );
-    
   };
 
   const handleChangeStatus = (value: string) => {
@@ -109,21 +109,28 @@ const ComplianceList = () => {
     );
   };
 
- 
+  const handleSearchCompliance = (value: string) => {
+    setSearchParams(
+      (prev) => {
+        prev.set("query", value);
+        return prev;
+      },
+      { replace: true }
+    );
 
-  const handleSearchCompliance = (value: string)=>{
-    setSearchParams((prev)=> {
-      prev.set("query", value);
-      return prev
-    },{replace: true})
-  }
+    setIsTyping(true); // Set typing indicator to true when user starts typing
+
+    setTimeout(() => {
+      setIsTyping(false); // Set typing indicator to false after a delay
+    }, 1000);
+  };
 
   const handleResetFilter = () => {
     try {
       handleChangeStatus("all");
       handleChangeLocale("all");
       handleChangeArea("all");
-      handleSearchCompliance("")
+      handleSearchCompliance("");
     } catch (error) {
       messageApi.error(`Sorry something went wrong: ${error}`);
     }
@@ -259,7 +266,7 @@ const ComplianceList = () => {
             }}
           >
             <Input
-            onChange={(e)=> handleSearchCompliance(e.target.value)}
+              onChange={(e) => handleSearchCompliance(e.target.value)}
               size={"small"}
               placeholder={"Search compliance"}
               variant={undefined}
@@ -339,16 +346,24 @@ const ComplianceList = () => {
           overflow: "auto",
         }}
       >
-        <List
-        query={query}
-          currentStatus={currentStatus}
-          currentLocale={currentLocale}
-          currentArea={currentArea}
-          currentAudit={currentAudit}
-          allLocale={allLocale}
-          auditList={auditList}
-          selectArea={selectArea}
-        />
+        {isTyping ? (
+          <Layout style={{ width: "100%", height: "100%", display: "grid" }}>
+            <div style={{ margin: "auto", width: 200, textAlign: "center" }}>
+              <Typography style={{fontWeight: 600, fontSize: "1.5rem"}}>Typing...</Typography>
+            </div>
+          </Layout>
+        ) : (
+          <List
+            query={query}
+            currentStatus={currentStatus}
+            currentLocale={currentLocale}
+            currentArea={currentArea}
+            currentAudit={currentAudit}
+            allLocale={allLocale}
+            auditList={auditList}
+            selectArea={selectArea}
+          />
+        )}
       </div>
     </Layout>
   );

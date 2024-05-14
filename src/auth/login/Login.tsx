@@ -10,7 +10,7 @@ import { Layout, Typography, Form, Divider } from "antd";
 import { FcGoogle } from "react-icons/fc";
 
 import "./style.css";
-import axios from "axios";
+import axios from "../../../server/api/axios";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 
 
@@ -24,14 +24,25 @@ function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [messageApi, contextMessage] = message.useMessage()
+  const [isError, setIsError] = useState<{message: string, target: string, status: boolean}>()
+
+  console.log(isError);
+  
 
   async function onFinish(values: FormFields) {
     setIsLoading(true)
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/login",
+        "auth/login",
         values
-      );
+      ) 
+      
+      if(response.data.status === false){
+        messageApi.error(response.data.message);
+        setIsError(response.data)
+        setIsLoading(false);
+        return;
+      }
 
       if (
         singnIn({
@@ -48,10 +59,13 @@ function Login() {
         setIsLoading(false)
         navigate("/");
       } else {
+        setIsError(response.data.message)
         navigate("/auth/login");
       }
       
     } catch (error) {
+      console.log(error);
+      
       messageApi.error(`Sorry something went wrong: ${error}`)
     }finally{
       setIsLoading(false)
