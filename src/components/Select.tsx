@@ -19,7 +19,8 @@ interface SelectProps {
   size: SizeType,
   loading?:boolean | undefined
   placeholder?: string
-  disabled?: boolean
+  disabled?: boolean;
+  children?: React.ReactNode
 }
 
 const Select = ({ defaultValue, options, onChange, style,value,size,loading,placeholder,disabled }: SelectProps) => {

@@ -1,9 +1,11 @@
+//controller
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../server/api/axios";
 import { useSearchParams } from "react-router-dom";
-import { handleSaveLocal, handleGetLocal } from "../../utils/localStorage";
+import { useDebounce } from "use-debounce";
 
+//ui
 import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import Tabs from "../../components/Tabs";
@@ -14,54 +16,119 @@ import ErrorPage from "../error_page/ErrorPage";
 import { Typography } from "antd";
 import { TabsProps, message } from "antd";
 
+//interface
 import {
   AuditProps,
   AreaProps,
   LocaleListProps,
 } from "../../interface/compliance";
-import { FieldProps } from "../../interface/manage";
 
-import Area from "./selection/Area";
+//selection
 import List from "./List";
 import Locale from "./selection/Locale";
+import AllArea from "./selection/AllArea";
+
+//utils
+import { handleSaveLocal, handleGetLocal } from "../../utils/localStorage";
+
+//icons
+import { TbZoomReset } from "react-icons/tb";
+
+const statusList: { value: string; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "submitted", label: "Recieved" },
+  { value: "ongoing", label: "On review" },
+  { value: "done", label: "Reviewed" },
+];
 
 const ComplianceList = () => {
   const [messageApi, contextMessage] = message.useMessage();
-  const [auditList, setAuditList] = useState<AuditProps[] | undefined>(
-    undefined
-  );
-  const [selectedAudit, setSelectedAudit] = useState<string | undefined>(
-    undefined
-  );
-  const [selectedArea, setSelectedArea] = useState<string | undefined>(
-    undefined
-  );
+  const [auditList, setAuditList] = useState<AuditProps[] | []>([]);
   const [selectArea, setAreaArea] = useState<AreaProps[] | []>();
-  const [allFieldList, setAllFieldList] = useState<TabsProps["items"] | null>(
-    null
-  );
-  const [allLocale, setAllLocale] = useState<LocaleListProps[] | []>();
+  const [allFieldList, setAllFieldList] = useState<TabsProps["items"] | []>([]);
+  const [allLocale, setAllLocale] = useState<LocaleListProps[] | []>([]);
   const [searchParams, setSearchParams] = useSearchParams({
-    audit: `${auditList && auditList[0]?.key}`, locale: "all",area: "all"
+    audit: `${auditList && auditList[0]?.key}`,
+    locale: "all",
+    area: "all",
+    status: "all",
+    query: ""
   });
   const currentAudit = searchParams.get("audit");
-  const currentLocale = searchParams.get("locale")
-  const currentArea = searchParams.get("area")
+  const currentStatus = searchParams.get("status") || "all";
+  const currentLocale = searchParams.get("locale") || "all";
+  const currentArea = searchParams.get("area") || "all";
+  const currentQuery = searchParams.get("query") || ""
+
+  const [query] = useDebounce(currentQuery, 500)
+  console.log(query);
+  
 
   const handleChangePath = (value: string) => {
-    setSelectedAudit(value);
-    setSearchParams({ audit: value }, { replace: true });
-    // Store the selected audit key in local storage
+    setSearchParams(
+      (prev) => {
+        prev.set("audit", value);
+        return prev;
+      },
+      { replace: true }
+    );
     localStorage.setItem("selectedAudit", value);
   };
 
-  // const handleChangeLocale = (value: string) => {
-  //   setSearchParams({ locale: value }, { replace: true });
-  //   localStorage.setItem("selectedLocale", value);
-  // };
+  const handleChangeArea = (value: string) => {
+    //setCurrentArea(value);
+    setSearchParams(
+      (prev) => {
+        prev.set("area", value);
+        return prev;
+      },
+      { replace: true }
+    );
+  };
 
-  console.log(selectedArea);
-  
+  const handleChangeLocale = (value: string) => {
+    //setCurrentLocale(value);
+    setSearchParams(
+      (prev) => {
+        prev.set("locale", value);
+        return prev;
+      },
+      { replace: true }
+    );
+    
+  };
+
+  const handleChangeStatus = (value: string) => {
+    //setCurrentStatus(value);
+    setSearchParams(
+      (prev) => {
+        prev.set("status", value);
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+ 
+
+  const handleSearchCompliance = (value: string)=>{
+    setSearchParams((prev)=> {
+      prev.set("query", value);
+      return prev
+    },{replace: true})
+  }
+
+  const handleResetFilter = () => {
+    try {
+      handleChangeStatus("all");
+      handleChangeLocale("all");
+      handleChangeArea("all");
+      handleSearchCompliance("")
+    } catch (error) {
+      messageApi.error(`Sorry something went wrong: ${error}`);
+    }
+  };
+
   const {
     data: fieldList,
     isLoading: fieldIsLoading,
@@ -71,14 +138,21 @@ const ComplianceList = () => {
     queryFn: () => axios.get("/data/field-list"),
   });
 
-  // const {
-  //   data: areas,
-  //   isLoading: areasIsLoading,
-  //   isError:areasIsError,
-  // } = useQuery({
-  //   queryKey: ["fieldList"],
-  //   queryFn: () => axios.get("/data/areas"),
-  // });
+  const {
+    data: areas,
+    isLoading: areasIsLoading,
+    isError: areasIsError,
+  } = useQuery({
+    queryKey: ["areas"],
+    queryFn: () => axios.get("/data/areas"),
+  });
+
+  const { data: localeList } = useQuery({
+    queryKey: ["localeList"],
+    queryFn: () => axios.get("/data/municipalities"),
+  });
+
+  console.log(areas?.data);
 
   const handleFieldCache = async () => {
     try {
@@ -86,30 +160,34 @@ const ComplianceList = () => {
         const temp = JSON.stringify(fieldList.data);
         await handleSaveLocal("allFieldDataList", temp);
       }
-      // if(areas?.data){
-      //   const locale = JSON.stringify(areas.data);
-      //   await handleSaveLocal("areasList", locale);
-      // }
+      if (areas?.data) {
+        const areasList = JSON.stringify(areas.data);
+        await handleSaveLocal("areasList", areasList);
+      }
+      if (localeList?.data) {
+        const locale = JSON.stringify(localeList.data);
+        await handleSaveLocal("localeList", locale);
+      }
     } catch (error) {
-      messageApi.error(`Something went wrong with caching data: ${error}`);
+      messageApi.error(`Something went wrong with caching data12: ${error}`);
     }
   };
 
   useEffect(() => {
     handleFieldCache();
-  }, [fieldList?.data]);
+  }, [fieldList?.data, areas?.data]);
 
   const handleTabsItem = async () => {
     try {
       const localFields = await handleGetLocal("allFieldDataList");
-      // const localArea = await handleGetLocal("areasList")
-      // const allArea:AreaProps[] =  JSON.parse(localArea as string) 
+      const localArea = await handleGetLocal("areasList");
+      const allArea: AreaProps[] = JSON.parse(localArea as string);
+      setAreaArea(allArea);
       const parsedData: AuditProps[] = JSON.parse(localFields as string);
       setAuditList(parsedData);
       const defaultAuditKey = parsedData[0]?.key;
       const storedAudit = localStorage.getItem("selectedAudit");
       if (storedAudit) {
-        setSelectedAudit(storedAudit);
         setSearchParams({ audit: storedAudit }, { replace: true });
       } else {
         setSearchParams({ audit: defaultAuditKey }, { replace: true });
@@ -156,7 +234,7 @@ const ComplianceList = () => {
   return (
     <Layout style={{ width: "100%", height: "100%%", backgroundColor: "#fff" }}>
       {contextMessage}
-      <div style={{ width: "100%", height: "20%", padding: "8px" }}>
+      <div style={{ width: "100%", height: "25%", padding: "8px" }}>
         {auditList && (
           <div style={{ width: "100%" }}>
             <Tabs
@@ -169,36 +247,103 @@ const ComplianceList = () => {
         <div
           style={{
             width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "8px",
+            marginTop: "8px",
           }}
         >
-          <Input
-            size={"small"}
-            placeholder={"Search compliance"}
-            variant={undefined}
-          />
-          <Area
-          setSearchParams={setSearchParams}
-          setSelectedArea={setSelectedArea}
-            setArea={setAreaArea}
-            selectedAudit={selectedAudit}
-            messageApi={messageApi}
-          />
-          <Locale setAllLocale={setAllLocale} messageApi={messageApi} />
-          <Select options={[]} size={undefined} />
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "8px",
+            }}
+          >
+            <Input
+            onChange={(e)=> handleSearchCompliance(e.target.value)}
+              size={"small"}
+              placeholder={"Search compliance"}
+              variant={undefined}
+            />
+            <Button onClick={handleResetFilter}>
+              <TbZoomReset />
+            </Button>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              marginTop: "8px",
+              gap: "16px",
+            }}
+          >
+            <div
+              style={{
+                width: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <Typography style={{ fontWeight: 500 }}>Areas:</Typography>
+              <AllArea
+                handleChangeArea={handleChangeArea}
+                currentArea={currentArea}
+                currentAudit={currentAudit}
+              />
+            </div>
+
+            <div
+              style={{
+                width: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <Typography style={{ fontWeight: 500 }}>Locale:</Typography>
+              <Locale
+                currentLocale={currentLocale}
+                handleChangeLocale={handleChangeLocale}
+                setAllLocale={setAllLocale}
+                messageApi={messageApi}
+                currentAudit={currentAudit}
+              />
+            </div>
+            <div
+              style={{
+                width: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <Typography style={{ fontWeight: 500 }}>Status:</Typography>
+              <Select
+                value={currentStatus || "all"}
+                onChange={handleChangeStatus}
+                defaultValue={"all"}
+                style={{ width: "200px" }}
+                options={statusList}
+                size={undefined}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
         style={{
           width: "100%",
-          height: "80%",
+          height: "75%",
           backgroundColor: "#fff",
           overflow: "auto",
         }}
       >
         <List
+        query={query}
+          currentStatus={currentStatus}
+          currentLocale={currentLocale}
+          currentArea={currentArea}
           currentAudit={currentAudit}
           allLocale={allLocale}
           auditList={auditList}

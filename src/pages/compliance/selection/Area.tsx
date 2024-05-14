@@ -18,6 +18,9 @@ interface AreaSelectionProps {
   setArea: React.Dispatch<React.SetStateAction<AreaProps[] | undefined>>;
   setSelectedArea: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSearchParams: SetURLSearchParams;
+  currentArea: string | null;
+  handleChangeArea: (value: string) => void;
+  currentAudit: string | null;
 }
 
 const Area = ({
@@ -26,8 +29,12 @@ const Area = ({
   setArea,
   setSelectedArea,
   setSearchParams,
+  currentArea,
+  handleChangeArea,
+  currentAudit,
 }: AreaSelectionProps) => {
   const [areasData, setAreaData] = useState<OptionProps[] | null>(null);
+  const [areasList, setAreaList] = useState<AreaProps[] | []>([]);
   const [areasError, setAreasError] = useState<unknown | null>(null);
 
   const {
@@ -40,94 +47,66 @@ const Area = ({
     // Consider adding select: false if unnecessary for pagination/infinite scrolling
   });
 
-  useEffect(() => {
-    const handleData = async () => {
-      try {
-        const cache = await handleGetLocal("areasList");
-        let parsedCache: AreaProps[] | undefined;
-        if (cache) {
-          parsedCache = JSON.parse(cache as string);
-        }
+  const hanldeGetArea = async () => {
+    try {
+      const parsedData: AreaProps[] = areas?.data;
+      let temp: { value: string; label: string; majorID?: string }[] = [
+        { value: "all", label: "All" },
+      ];
 
-        const fetchedData: AreaProps[] = areas?.data || [];
-        setArea(fetchedData);
-
-        if (
-          !parsedCache ||
-          (selectedAudit &&
-            JSON.stringify(
-              parsedCache.filter((item) => item.auditKey === selectedAudit)
-            ) !==
-              JSON.stringify(
-                fetchedData.filter((item) => item.auditKey === selectedAudit)
-              ))
-        ) {
-          const filteredData = selectedAudit
-            ? fetchedData.filter((item) => item.auditKey === selectedAudit)
-            : fetchedData;
-          const stringData = JSON.stringify(filteredData);
-          await handleSaveLocal("areasList", stringData);
-          setSelectedArea(filteredData[0].pushKey);
-          let temp: { value: string; label: string }[] = [
-            { label: "All", value: "all" },
-          ];
-          for (let item of fetchedData) {
-            temp.push({ value: item.pushKey, label: item.title });
-          }
-          setAreaData(temp);
-        } else {
-          const cachedData = parsedCache?.filter(
-            (item) => item.auditKey === selectedAudit
-          );
-          setAreaData(
-            cachedData?.map((item) => ({
-              label: item.title,
-              value: item.pushKey,
-            }))
-          );
-        }
-      } catch (error) {
-        setAreasError(error);
-        messageApi.error(`Something went wrong with datas: ${error}`);
+      for (let item of Object.values(parsedData)) {
+        temp.push({
+          label: item.title,
+          value: item.pushKey,
+          majorID: item.auditKey,
+        });
       }
-    };
+      console.log(temp);
 
-    handleData();
-  }, [areas?.data, selectedAudit]);
-
-  const handleChangeArea = (value: string) => {
-    setSearchParams(
-      (prev) => {
-        prev.set("area", value);
-        return prev;
-      },
-      { replace: true }
-    );
+      setAreaData(temp);
+      setAreaList(parsedData);
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  useEffect(() => {
+    hanldeGetArea();
+  }, [areas?.data]);
+
+  
+
+  // const handleFilterArea = (): OptionProps[]=>{
+  //   try {
+  //     return []
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   // Handle loading, error, and data states
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  // if (areasError) {
-  //   return <div>Error fetching areas: {areasError.message}</div>;
-  // }
-
-  if (!areasData) {
-    return null; // Or display a placeholder message
-  }
-
   return (
-    <Select
-    defaultValue="all"
-      onChange={handleChangeArea}
-      disabled={isLoading}
-      placeholder="Select area"
-      loading={isLoading}
-      options={areasData}
-      size={undefined}
-    />
+    <>
+      {areasData && (
+        <Select
+          value={currentArea}
+          style={{ width: "150px" }}
+          defaultValue="all"
+          onChange={handleChangeArea}
+          disabled={isLoading}
+          placeholder="Select area"
+          loading={isLoading}
+          options={areasData.filter(
+            (item) => item.value === "all" && item.majorID === currentAudit
+          )}
+          size={undefined}
+        />
+      )}
+    </>
   );
 };
 

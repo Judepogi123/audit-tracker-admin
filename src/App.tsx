@@ -33,6 +33,7 @@ import NewAudit from "./routes/new/NewAudit";
 import AuditInfo from "./pages/manage-users/_sglg/AuditInfo";
 import NewAreaField from "./pages/manage-users/_sglg/NewAreaField";
 import NewLocale from "./pages/municipalities/NewLocale";
+import AllCompliance from "./pages/compliance/AllCompliance";
 
 import ComplianceDataProvider from "./provider/ComlianceDataProvider";
 

@@ -22,6 +22,7 @@ export interface AreaProps {
 }
 
 export interface OptionProps {
+  majorID? : string
   value: string | number;
   label: string;
   disabled?: boolean;
@@ -38,11 +39,14 @@ export interface ComplianceDataProps {
   viewed: boolean;
   zipCode: string;
   checkedBy: string
+  title: string;
+  localeName: string
 }
 
 export interface LocaleListProps {
   municipalityName: string;
-  zipCode: number;
+  zipCode: string;
+  type:string
 }
 
 export interface CollapseItem {

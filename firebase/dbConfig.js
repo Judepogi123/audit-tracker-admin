@@ -19,9 +19,13 @@ import {
   remove,
   query as dbQuery,
   limitToLast,
+  limitToFirst,
   orderByKey,
   startAfter,
-  orderByChild
+  orderByChild,
+  equalTo,
+  startAt,
+  
 } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 
@@ -52,9 +56,12 @@ export {
   onValue,
   dbQuery,
   limitToLast,
+  limitToFirst,
   orderByKey,
   orderByChild,
   startAfter,
+  startAt,
+  equalTo,
   off,
   doc,
   getDoc,

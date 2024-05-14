@@ -32,7 +32,7 @@ router.post("/update-props", async(req, res)=>{
         const snapshot = await get(dataRef)
         if(snapshot.exists()){
 
-            await update(dataRef, { viewed: true, checkedBy: request.userList})
+            await update(dataRef, { viewed: true, checkedBy: request.userList, status: "ongoing"})
             res.status(200).json({message: "success", status: "success"})
         }else{
             res.status(200).json({message: "Item not found", status: "error"})

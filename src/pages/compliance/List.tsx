@@ -25,33 +25,42 @@ import {
   handleSearchName,
 } from "./_external-function/_handleGetFieldName";
 
-
 //
 import { MdOutlineCallReceived } from "react-icons/md";
 import { IoIosDoneAll } from "react-icons/io";
 import { MdOutlineRateReview } from "react-icons/md";
 
-
 interface ListProps {
   auditList: AuditProps[] | undefined;
   selectArea: [] | AreaProps[] | undefined;
   allLocale: [] | LocaleListProps[] | undefined;
-  currentAudit: string | null
+  currentAudit: string | null;
+  currentArea: string | null;
+  currentLocale: string | null;
+  currentStatus: string | null
+  query: string
 }
 
-const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
+const List = ({
+  auditList,
+  selectArea,
+  allLocale,
+  currentAudit,
+  currentArea,
+  currentLocale,
+  currentStatus,
+  query
+}: ListProps) => {
   const [dataList, setDataList] = useState<ComplianceDataProps[]>([]);
-
+  
+  const querykey = ["title", "zipCode","localeName"]
 
   const user = useUserData();
   const navigate = useNavigate();
 
   const [messageApi, contextMessage] = message.useMessage();
 
-  console.log(allLocale);
-  
-
-  const { data: complianceList, isError:complianceIsError } = useQuery({
+  const { data: complianceList, isError: complianceIsError } = useQuery({
     queryKey: ["complianceList"],
     queryFn: () => axios.get(`/data/compliance`),
   });
@@ -77,7 +86,12 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
         return;
       }
       const cache: ComplianceDataProps[] = JSON.parse(temp as string);
-      setDataList(cache);
+      const newCopy = cache.map((item) => ({
+        ...item,
+        title: hanldeSearchItem(item.fieldPushKey, selectArea) as string,
+        localeName: handleSearchName(item.zipCode, allLocale) as string
+      }));
+      setDataList(newCopy);
     } catch (error) {
       messageApi.error(`Sorry something went wrong parsing data: ${error}`);
     }
@@ -86,33 +100,33 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
 
   useEffect(() => {
     handleGetLocalData();
-  }, [complianceList?.data]);
+  }, []);
 
   const handleUpdateCheckBy = async (list: string) => {
     try {
-        const temp = list ? JSON.parse(list) : [];
-        let found = false;
-        for (let item of temp) {
-            if (item === user.userName) {
-                found = true;
-                break;
-            }
+      const temp = list ? JSON.parse(list) : [];
+      let found = false;
+      for (let item of temp) {
+        if (item === user.userName) {
+          found = true;
+          break;
         }
-        if (!found) {
-            temp.push(user.userName);
-        }
-        return JSON.stringify(temp);
+      }
+      if (!found) {
+        temp.push(user.userName);
+      }
+      return JSON.stringify(temp);
     } catch (error) {
-        messageApi.error(`Something went wrong: ${error}`)
+      messageApi.error(`Something went wrong: ${error}`);
     }
-};
+  };
 
   const handleViewCompliance = async (
     key: string,
     code: string,
     checkedBy: string
   ) => {
-    let reviewed =await handleUpdateCheckBy(checkedBy)
+    let reviewed = await handleUpdateCheckBy(checkedBy);
 
     try {
       const matchedIndex = dataList?.findIndex((item) => item.pushKey === key);
@@ -123,12 +137,11 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
             index === matchedIndex ? { ...item, viewed: true } : item
           )
         );
-        // Send request to update backend
         const response = await axios.post(`/data/update-props`, {
           user: user.userName,
           pushKey: key,
           code: code,
-          userList: reviewed
+          userList: reviewed,
         });
 
         if (response.status === 200) {
@@ -143,8 +156,6 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
       messageApi.error(`${error}`);
     }
   };
-
-  
 
   if (dataList === undefined || complianceIsError) {
     return (
@@ -163,16 +174,24 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
     if (!dataList || dataList.length === 0) {
       return [];
     }
-    return Object.values(dataList).reverse().filter((item) => item.auditKey === currentAudit);
+    return dataList
+      .reverse()
+      .filter(
+        (item) =>
+          item.auditKey === currentAudit &&
+          (currentArea === "all" || item.fieldPushKey === currentArea) &&
+          (currentLocale === "all" || item.zipCode === currentLocale) && 
+          (currentStatus === "all" || item.status === currentStatus) && 
+          querykey.some((key)=> (item as any)[key]?.toLowerCase()?.includes(query?.toLowerCase()))
+      );
   };
-  
 
   return (
     <Layout style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
       {contextMessage}
 
       <div
-      id="complianceList"
+        id="complianceList"
         style={{
           width: "100%",
           height: "100%",
@@ -182,21 +201,17 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
           padding: "4px 8px",
         }}
       >
-        { handleFilterList().length < 1 ? (
+        {handleFilterList().length < 1 ? (
           <div style={{ width: "100%", height: "100%", display: "grid" }}>
             <Typography style={{ margin: "auto" }}>
-              No comliance found.
+              No compliance found.
             </Typography>
           </div>
         ) : (
           handleFilterList().map((item) => (
             <div
               onClick={() =>
-                handleViewCompliance(
-                  item.pushKey,
-                  item.zipCode,
-                  item.checkedBy
-                )
+                handleViewCompliance(item.pushKey, item.zipCode, item.checkedBy)
               }
               key={item.pushKey}
               style={{
@@ -223,19 +238,20 @@ const List = ({ auditList, selectArea, allLocale,currentAudit }: ListProps) => {
                   ""
                 )}
                 <div>
-                  <Typography
-                    style={{ fontSize: "1.1rem", fontWeight: 600 }}
-                  >
-                    {hanldeSearchItem(item.fieldPushKey, selectArea)}
+                  <Typography style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                    {item.title}
                   </Typography>{" "}
                   <Typography>
-                    {handleSearchName(item.zipCode, allLocale)}
+                    {item.localeName}
                   </Typography>
                 </div>
               </div>
 
               <div style={{ display: "flex", alignItems: "center" }}>
-                <Typography>{item.timestamp}</Typography>
+                <Typography>
+                  {item.status}
+                  {item.timestamp}
+                </Typography>
               </div>
             </div>
           ))

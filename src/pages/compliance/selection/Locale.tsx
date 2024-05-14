@@ -9,15 +9,38 @@ import { LocaleListProps, OptionProps } from "../../../interface/compliance";
 import Layout from "../../../components/Layout";
 import Select from "../../../components/Select";
 import { MessageInstance } from "antd/es/message/interface";
+import { handleDefineType } from "../../../utils/locale";
 
 interface LocaleProps {
   messageApi: MessageInstance;
   setAllLocale: React.Dispatch<
-    React.SetStateAction<LocaleListProps[] | undefined>
+    React.SetStateAction<LocaleListProps[] | []>
   >;
+  currentAudit: string | null;
+  handleChangeLocale: (value: string) => void;
+  currentLocale: string | null
 }
 
-const Locale = ({ messageApi, setAllLocale }: LocaleProps) => {
+const Locale = ({ messageApi, setAllLocale,currentAudit,handleChangeLocale,currentLocale}: LocaleProps) => {
+  const [localeData, setLocaleData] = useState<OptionProps[] | []>([])
+  const allLocale = localStorage.getItem("localeList");
+  const localeType = handleDefineType(currentAudit as string)
+
+  useEffect(() => {
+    const list: LocaleListProps[] = allLocale ? JSON.parse(allLocale as string) : [];
+    let temp: { label: string; value: string; majorID?: string }[] = [
+      { label: "All", value: "all" },
+    ];
+    for (let item of list) {
+      temp.push({
+        value: item.zipCode,
+        label: item.municipalityName,
+        majorID: item.type,
+      });
+    }
+    setLocaleData(temp);
+  }, [allLocale]);
+
   const [allLocalList, setLocaleList] = useState<OptionProps[] | []>([
     { label: "All", value: "all" },
   ]);
@@ -53,7 +76,7 @@ const Locale = ({ messageApi, setAllLocale }: LocaleProps) => {
           );
         } else {
           setLocaleList(
-            parsedCache.map((item) => ({
+            parsedCache.filter((item)=> item.type === handleDefineType(currentAudit as string)).map((item) => ({
               label: item.municipalityName,
               value: item.zipCode,
             }))
@@ -65,12 +88,16 @@ const Locale = ({ messageApi, setAllLocale }: LocaleProps) => {
     };
 
     handleData();
-  }, [localeList?.data, messageApi]);
+  }, [localeList?.data,currentAudit ]);
 
   return (
     <Select
+    value={currentLocale || "all"}
+    defaultValue={"all"}
+    onChange={handleChangeLocale}
+    style={{ width: "200px" }}
       placeholder="Select locale"
-      options={allLocalList as OptionProps[]}
+      options={localeData.filter((item)=> item.value === "all" || item.majorID === localeType)}
       size={undefined}
     />
   );
