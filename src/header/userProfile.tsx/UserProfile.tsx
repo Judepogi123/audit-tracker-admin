@@ -59,7 +59,7 @@ const UserProfile = () => {
             <Avatar
             style={{ margin: "auto" }}
             size={100}
-            src={userData.profilePicture || "https://firebasestorage.googleapis.com/v0/b/audit-tracker-d4e91.appspot.com/o/user.png?alt=media&token=b17c90e3-5244-4a4c-a6f6-0c960b052d13"}
+            src={userData.userProfilePicture || "https://firebasestorage.googleapis.com/v0/b/audit-tracker-d4e91.appspot.com/o/user.png?alt=media&token=b17c90e3-5244-4a4c-a6f6-0c960b052d13"}
           /> : <Skeleton paragraph={{ rows: 1, }} active/>
           }
           

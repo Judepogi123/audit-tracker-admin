@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "../../components/Button";
 import InputPassword from "../../components/InputPassword";
 import Input from "../../components/Input";
@@ -6,8 +6,7 @@ import {message} from "antd"
 
 import { Outlet, useNavigate } from "react-router-dom";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import { Layout, Typography, Form, Divider } from "antd";
-import { FcGoogle } from "react-icons/fc";
+import { Layout, Typography, Form } from "antd";
 
 import "./style.css";
 import axios from "../../../server/api/axios";

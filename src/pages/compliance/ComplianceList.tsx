@@ -77,7 +77,6 @@ const ComplianceList = () => {
   };
 
   const handleChangeArea = (value: string) => {
-    //setCurrentArea(value);
     setSearchParams(
       (prev) => {
         prev.set("area", value);
@@ -88,7 +87,6 @@ const ComplianceList = () => {
   };
 
   const handleChangeLocale = (value: string) => {
-    //setCurrentLocale(value);
     setSearchParams(
       (prev) => {
         prev.set("locale", value);
@@ -99,7 +97,6 @@ const ComplianceList = () => {
   };
 
   const handleChangeStatus = (value: string) => {
-    //setCurrentStatus(value);
     setSearchParams(
       (prev) => {
         prev.set("status", value);
@@ -118,10 +115,10 @@ const ComplianceList = () => {
       { replace: true }
     );
 
-    setIsTyping(true); // Set typing indicator to true when user starts typing
+    setIsTyping(true); 
 
     setTimeout(() => {
-      setIsTyping(false); // Set typing indicator to false after a delay
+      setIsTyping(false); 
     }, 1000);
   };
 
@@ -139,7 +136,7 @@ const ComplianceList = () => {
   const {
     data: fieldList,
     isLoading: fieldIsLoading,
-    isError,
+    //isError,
   } = useQuery({
     queryKey: ["fieldList"],
     queryFn: () => axios.get("/data/field-list"),
@@ -147,8 +144,8 @@ const ComplianceList = () => {
 
   const {
     data: areas,
-    isLoading: areasIsLoading,
-    isError: areasIsError,
+    // isLoading: areasIsLoading,
+    // isError: areasIsError,
   } = useQuery({
     queryKey: ["areas"],
     queryFn: () => axios.get("/data/areas"),

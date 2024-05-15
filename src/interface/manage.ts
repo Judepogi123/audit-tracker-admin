@@ -110,3 +110,15 @@ export interface ActivityLogs {
   date: string;
   desc: string;
 }
+
+
+export interface UserProps {
+  userName: string;
+  userProfilePicture: string;
+  userType: string;
+  userFullName: string;
+  userZoneId: number;
+  userAddress: string;
+  history: any;
+  userPermission: string
+}

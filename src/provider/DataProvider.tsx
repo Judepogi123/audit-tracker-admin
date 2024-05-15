@@ -12,7 +12,7 @@ import Spinner from "../components/Spinner";
 
 interface UserProps {
   userName: string;
-  profilePicture: string;
+  userProfilePicture: string;
   userType: string;
   userFullName: string;
   userZoneId: number;

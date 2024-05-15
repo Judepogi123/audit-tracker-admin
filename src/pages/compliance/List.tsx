@@ -6,7 +6,7 @@ import { message, Typography } from "antd";
 //controller
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../server/api/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import { useUserData } from "../../provider/DataProvider";
 
 //interface
@@ -25,7 +25,7 @@ import {
   handleSearchName,
 } from "./_external-function/_handleGetFieldName";
 
-//
+//icons
 import { MdOutlineCallReceived } from "react-icons/md";
 import { IoIosDoneAll } from "react-icons/io";
 import { MdOutlineRateReview } from "react-icons/md";
@@ -50,9 +50,12 @@ const List = ({
   currentLocale,
   currentStatus,
   query,
-
 }: ListProps) => {
   const [dataList, setDataList] = useState<ComplianceDataProps[]>([]);
+  
+  const url = useLocation()
+  const location = url.search
+  console.log(location);
   
   const querykey = ["title", "zipCode","localeName"]
 
@@ -101,7 +104,7 @@ const List = ({
 
   useEffect(() => {
     handleGetLocalData();
-  }, [complianceList?.data]);
+  }, [complianceList?.data,]);
 
   const handleUpdateCheckBy = async (list: string) => {
     try {
@@ -240,17 +243,16 @@ const List = ({
                 )}
                 <div>
                   <Typography style={{ fontSize: "1.1rem", fontWeight: 600 }}>
-                    {item.title}
+                    {hanldeSearchItem(item.fieldPushKey, selectArea) }
                   </Typography>{" "}
                   <Typography>
-                    {item.localeName}
+                    {handleSearchName(item.zipCode, allLocale)}
                   </Typography>
                 </div>
               </div>
 
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Typography>
-                  {item.status}
                   {item.timestamp}
                 </Typography>
               </div>
