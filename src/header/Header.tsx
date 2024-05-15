@@ -26,9 +26,9 @@ const Header = () => {
     setOpen(newOpen);
   };
 
-  const handleOpenNotif = (newOpen: boolean) => {
-    setOpenNotif(newOpen);
-  };
+  // const handleOpenNotif = (newOpen: boolean) => {
+  //   setOpenNotif(newOpen);
+  // };
 
   const data = useUserData() 
 
@@ -56,7 +56,7 @@ const Header = () => {
         </Typography.Title>
       </div>
       <div className="right-header">
-        <div className="notification-container">
+        {/* <div className="notification-container">
           <Popover
             open={openNotif}
             onOpenChange={handleOpenNotif}
@@ -72,7 +72,7 @@ const Header = () => {
             </Badge>
             </div>
           </Popover>
-        </div>
+        </div> */}
 
 
         <div className="profile-container">

@@ -16,9 +16,6 @@ const UserProfile = () => {
 
     const userData = useUserData()
 
-    console.log(userData.userPermission);
-    
-
     const handleSignOut = async()=>{
         try {
           await handleSaveLocal("selectedPath", "/dashboard");

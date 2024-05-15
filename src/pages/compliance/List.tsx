@@ -16,7 +16,6 @@ import {
   ComplianceDataProps,
   LocaleListProps,
 } from "../../interface/compliance";
-import { FieldProps } from "../../interface/manage";
 
 //utils
 import { handleGetLocal, handleSaveLocal } from "../../utils/localStorage";
