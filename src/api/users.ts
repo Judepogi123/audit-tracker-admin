@@ -1,5 +1,4 @@
 import axios from "../../server/api/axios";
-import { UserProps } from "../interface/manage";
 
 export const handleFetchUser = async (pageParam: string) => {
     console.log(pageParam);
