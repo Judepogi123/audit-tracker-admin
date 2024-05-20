@@ -165,14 +165,10 @@ const Content = ({
     }
   };
 
-  console.log("list: ",complianceList);
-
   const {data:dataList, isError: complianceIsError, isLoading: complianceIsLoading} = useQuery({
     queryKey: ["dataList"],
     queryFn: ()=> axios.get("/data/compliance")
   })
-
-  console.log(data?.data);
   
   
 

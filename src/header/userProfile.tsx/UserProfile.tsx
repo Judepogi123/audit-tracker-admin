@@ -1,4 +1,3 @@
-import React from "react";
 import { Layout, Typography,Divider,Skeleton } from "antd";
 import useSignOut from 'react-auth-kit/hooks/useSignOut';
 import { useNavigate } from "react-router-dom";
@@ -6,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button";
 
-//provider
+
 import { useUserData } from "../../provider/DataProvider";
 import { handleSaveLocal } from "../../utils/localStorage";
 

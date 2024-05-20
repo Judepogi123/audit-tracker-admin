@@ -75,7 +75,6 @@ function App() {
 
             <Route path="compliance" element={<ComplianceList />}>
 
-              <Route path="/compliance/:municipalID" element={<Content />} />
             </Route>
             <Route
               path="/compliance/:zipCode/compliance/:complianceID"
