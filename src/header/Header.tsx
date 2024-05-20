@@ -1,6 +1,5 @@
 import { useState,useEffect } from "react";
 import LOGO from "../assets/newDILG.png";
-import { IoNotifications } from "react-icons/io5";
 import "./style.scss";
 
 import { Layout, Image, Typography } from "antd";
@@ -9,26 +8,19 @@ import { Layout, Image, Typography } from "antd";
 import Popover from "../components/Popover";
 import Avatar from "../components/Avatar";
 import UserProfile from "./userProfile.tsx/UserProfile";
-import UserNotification from "./userNotification/UserNotification";
-import Badge from "../components/Badge";
 
 import { useUserData } from "../provider/DataProvider";
 
-//interface
 import { UserProps } from "../interface/manage";
 
 const Header = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserProps>()
-  const [openNotif, setOpenNotif] = useState<boolean>(false);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
   };
 
-  // const handleOpenNotif = (newOpen: boolean) => {
-  //   setOpenNotif(newOpen);
-  // };
 
   const data = useUserData() 
 
@@ -56,23 +48,6 @@ const Header = () => {
         </Typography.Title>
       </div>
       <div className="right-header">
-        {/* <div className="notification-container">
-          <Popover
-            open={openNotif}
-            onOpenChange={handleOpenNotif}
-            trigger="click"
-            content={<UserNotification />}
-            placement="topRight"
-          >
-            <div>
-            <Badge count={5}>
-              <div>
-                <IoNotifications fontSize={40} color="#ccc" />
-              </div>
-            </Badge>
-            </div>
-          </Popover>
-        </div> */}
 
 
         <div className="profile-container">
