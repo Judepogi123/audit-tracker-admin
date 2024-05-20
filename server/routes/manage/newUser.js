@@ -34,7 +34,6 @@ const handleAdminHashing = async (password) => {
 
 router.post("/new-user", async (req, res) => {
   const request = req.body;
-  console.log(request);
   try {
     const permissionList = {
       compliance: request.compliance,
@@ -88,7 +87,6 @@ router.post("/new-user", async (req, res) => {
         .json({ message: "User added successfully", status: "success" });
     }
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: `Internal server error: ${error}`, status: "error" });

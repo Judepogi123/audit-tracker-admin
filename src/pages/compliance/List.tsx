@@ -6,7 +6,7 @@ import { message, Typography } from "antd";
 //controller
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../server/api/axios";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useUserData } from "../../provider/DataProvider";
 
 //interface
@@ -36,7 +36,7 @@ interface ListProps {
   currentAudit: string | null;
   currentArea: string | null;
   currentLocale: string | null;
-  currentStatus: string | null
+  currentStatus: string | null;
   query: string;
 }
 
@@ -51,12 +51,11 @@ const List = ({
   query,
 }: ListProps) => {
   const [dataList, setDataList] = useState<ComplianceDataProps[]>([]);
-  
-  const url = useLocation()
-  const location = url.search
-  console.log(location);
-  
-  const querykey = ["title", "zipCode","localeName"]
+
+  const url = useLocation();
+  const location = url.search;
+
+  const querykey = ["title", "zipCode", "localeName"];
 
   const user = useUserData();
   const navigate = useNavigate();
@@ -92,18 +91,17 @@ const List = ({
       const newCopy = cache.map((item) => ({
         ...item,
         title: hanldeSearchItem(item.fieldPushKey, selectArea) as string,
-        localeName: handleSearchName(item.zipCode, allLocale) as string
+        localeName: handleSearchName(item.zipCode, allLocale) as string,
       }));
       setDataList(newCopy);
     } catch (error) {
       messageApi.error(`Sorry something went wrong parsing data: ${error}`);
     }
   };
-  
 
   useEffect(() => {
     handleGetLocalData();
-  }, [complianceList?.data,]);
+  }, [complianceList?.data]);
 
   const handleUpdateCheckBy = async (list: string) => {
     try {
@@ -127,7 +125,8 @@ const List = ({
   const handleViewCompliance = async (
     key: string,
     code: string,
-    checkedBy: string
+    checkedBy: string,
+    status: string
   ) => {
     let reviewed = await handleUpdateCheckBy(checkedBy);
 
@@ -145,10 +144,11 @@ const List = ({
           pushKey: key,
           code: code,
           userList: reviewed,
+          status: status,
         });
 
         if (response.status === 200) {
-          navigate(`/compliance/${code}/${key}`);
+          navigate(`/compliance/${code}/compliance/${key}`);
         } else {
           messageApi.error(`Update error.`);
         }
@@ -181,11 +181,14 @@ const List = ({
       .reverse()
       .filter(
         (item) =>
+          (item.archived === false || !item.archived) &&
           item.auditKey === currentAudit &&
           (currentArea === "all" || item.fieldPushKey === currentArea) &&
-          (currentLocale === "all" || item.zipCode === currentLocale) && 
-          (currentStatus === "all" || item.status === currentStatus) && 
-          querykey.some((key)=> (item as any)[key]?.toLowerCase()?.includes(query?.toLowerCase()))
+          (currentLocale === "all" || item.zipCode === currentLocale) &&
+          (currentStatus === "all" || item.status === currentStatus) &&
+          querykey.some((key) =>
+            (item as any)[key]?.toLowerCase()?.includes(query?.toLowerCase())
+          )
       );
   };
 
@@ -214,7 +217,12 @@ const List = ({
           handleFilterList().map((item) => (
             <div
               onClick={() =>
-                handleViewCompliance(item.pushKey, item.zipCode, item.checkedBy)
+                handleViewCompliance(
+                  item.pushKey,
+                  item.zipCode,
+                  item.checkedBy,
+                  item.status
+                )
               }
               key={item.pushKey}
               style={{
@@ -242,7 +250,7 @@ const List = ({
                 )}
                 <div>
                   <Typography style={{ fontSize: "1.1rem", fontWeight: 600 }}>
-                    {hanldeSearchItem(item.fieldPushKey, selectArea) }
+                    {hanldeSearchItem(item.fieldPushKey, selectArea)}
                   </Typography>{" "}
                   <Typography>
                     {handleSearchName(item.zipCode, allLocale)}
@@ -251,9 +259,7 @@ const List = ({
               </div>
 
               <div style={{ display: "flex", alignItems: "center" }}>
-                <Typography>
-                  {item.timestamp}
-                </Typography>
+                <Typography>{item.timestamp}</Typography>
               </div>
             </div>
           ))

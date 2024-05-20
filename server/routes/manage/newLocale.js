@@ -14,6 +14,7 @@ import CryptoJS from "crypto-js";
 const router = express.Router();
 
 const handleGetName = (value, type) => {
+  console.log(value);
   try {
     const temp = value.split("-");
     if (type === "name") return temp[1];
@@ -70,8 +71,10 @@ router.post("/new-locale", async (req, res) => {
             : `${handleGetName(request.municipality, "name")}, ${request.localeName}`
         }`,
         type: request.localeType,
-        municipalZipCode: zipCode
+        municipalZipCode: zipCode,
+        queryKey: request.localeName.toLowerCase()
       }),
+
       setDoc(doc(firestore, `user_data`, username), {
         userProfilePicture:
           "https://firebasestorage.googleapis.com/v0/b/audit-tracker-d4e91.appspot.com/o/profile1.webp?alt=media&token=40d0d01f-fd6e-4b0c-ae97-eb14b2def05e",

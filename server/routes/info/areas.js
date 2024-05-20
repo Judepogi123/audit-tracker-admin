@@ -1,5 +1,5 @@
 import express from "express";
-import { database, get, ref } from "../../../firebase/dbConfig.js";
+import { database, get, ref} from "../../../firebase/dbConfig.js";
 
 
 const router = express.Router();
@@ -10,7 +10,6 @@ router.get("/areas", async (req, res) => {
     const snapshot = await get(dataRef);
     if (snapshot.exists()) {
         const data = Object.values(snapshot.val())
-        console.log(data);
         res.status(200).json(data)
     }
   } catch (error) {

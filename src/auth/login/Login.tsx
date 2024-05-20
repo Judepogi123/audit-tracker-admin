@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "../../components/Button";
 import InputPassword from "../../components/InputPassword";
 import Input from "../../components/Input";
-import {message} from "antd"
+import { message } from "antd";
 
 import { Outlet, useNavigate } from "react-router-dom";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
@@ -12,7 +12,6 @@ import "./style.css";
 import axios from "../../../server/api/axios";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 
-
 interface FormFields {
   username: string;
   password: string;
@@ -21,24 +20,24 @@ interface FormFields {
 function Login() {
   const singnIn = useSignIn();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [messageApi, contextMessage] = message.useMessage()
-  const [isError, setIsError] = useState<{message: string, target: string, status: boolean}>()
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [messageApi, contextMessage] = message.useMessage();
+  const [isError, setIsError] = useState<{
+    message: string;
+    target: string;
+    status: boolean;
+  }>();
 
   console.log(isError);
-  
 
   async function onFinish(values: FormFields) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await axios.post(
-        "auth/login",
-        values
-      ) 
-      
-      if(response.data.status === false){
+      const response = await axios.post("auth/login", values);
+
+      if (response.data.status === false) {
         messageApi.error(response.data.message);
-        setIsError(response.data)
+        setIsError(response.data);
         setIsLoading(false);
         return;
       }
@@ -53,21 +52,19 @@ function Login() {
             name: response.data.username,
           },
         })
-        
       ) {
-        setIsLoading(false)
+        setIsLoading(false);
         navigate("/");
       } else {
-        setIsError(response.data.message)
+        setIsError(response.data.message);
         navigate("/auth/login");
       }
-      
     } catch (error) {
       console.log(error);
-      
-      messageApi.error(`Sorry something went wrong: ${error}`)
-    }finally{
-      setIsLoading(false)
+
+      messageApi.error(`Sorry something went wrong: ${error}`);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -104,7 +101,13 @@ function Login() {
 
             <Form.Item
               name="password"
-              rules={[{ required: true, message: "Password is required!" }]}
+              rules={[
+                { required: true, message: "Password is required!" },
+                {
+                  required: isError?.status && isError.target === "password",
+                  message: isError?.message,
+                },
+              ]}
             >
               <InputPassword
                 iconRender={(visible) =>
@@ -121,13 +124,12 @@ function Login() {
 
           <div className="login-footer">
             <Button
-            loading={isLoading}
+              loading={isLoading}
               style={{ backgroundColor: "#3a86ff", height: "40px" }}
               htmlType="submit"
               type={"primary"}
               children={"Login"}
             />
-
           </div>
         </Form>
       </div>

@@ -34,6 +34,7 @@ import areaDraftList from "./routes/info/areaDraftList.js";
 import localeList from "./routes/info/locale.js";
 import newLocale from "./routes/manage/newLocale.js";
 import archive from "./routes/update/archiveArea.js";
+import userList from "./routes/info/users.js"
 
 const port = 3000;
 
@@ -74,6 +75,7 @@ app.use("/data", areaDraftList);
 app.use("/data", localeList);
 app.use("/data", newLocale);
 app.use("/data", archive);
+app.use("/data", userList)
 
 app.listen(port, () => {
   console.log("Listening on port, 2024:", port);

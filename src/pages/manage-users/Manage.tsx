@@ -6,18 +6,16 @@ import "./_sglg/style.scss";
 
 import Tabs from "../../components/Tabs";
 
-import System from "./_sglg/System";
 import Users from "./_users/Users";
 import AdminLogs from "./_logs/AdminLogs";
-import Files from "./files/Files";
 import Archive from "./archive/Archive";
 import Audits from "./_sglg/Audits";
 
 const tablists = [
   { label: "Audit", key: "audit" },
   { label: "Users", key: "users" },
-  { label: "Archived", key: "archive" },
-  { label: "Activity Logs", key: "logs" },
+  { label: "Archives", key: "archive" },
+  // { label: "Activity Logs", key: "logs" },
 ];
 
 

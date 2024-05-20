@@ -18,11 +18,11 @@ import { CiSquareCheck } from "react-icons/ci";
 import { IoNotifications } from "react-icons/io5";
 import { IoBookmarks } from "react-icons/io5";
 import { IoBookmarksOutline } from "react-icons/io5";
+
+//controller
 import axios from "../../../../server/api/axios";
 import { useUserData } from "../../../provider/DataProvider";
-
-import { handleGetLocal, handleSaveLocal } from "../../../utils/localStorage";
-import { PermissionsProps } from "../../../interface/manage";
+import { PermissionsProps, UserProps } from "../../../interface/manage";
 
 interface ValueProps {
   title: string;
@@ -62,23 +62,15 @@ interface ComplianceDataProps {
   zipCode: string;
   senderInfo: UserProps;
   parsedAnswer: IndicatorsProps[];
-  checkedBy: string
+  checkedBy: string;
+  reviewed: string
+  userList: UserProps[]
 }
 
 interface ValueProps {
   title: string;
   key: string;
 }
-
-interface UserProps {
-  userName: string;
-  profilePicture: string;
-  userType: string;
-  userFullName: string;
-  userZoneId: number;
-  userAddress: string;
-}
-
 type ComplianceIndicator = {
   data: IndicatorsProps;
   setDataList: React.Dispatch<
@@ -91,6 +83,7 @@ type ComplianceIndicator = {
   >;
   indicatorList: IndicatorsProps[] | [] | undefined;
   fieldList: FieldProps[];
+  disabled: boolean
 };
 
 interface NotifyProps {
@@ -117,6 +110,7 @@ const IndicatorItem = ({
   setIndicatorList,
   indicatorList,
   fieldList,
+  disabled
 }: ComplianceIndicator) => {
   const [onView, setOnView] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
@@ -297,7 +291,7 @@ const IndicatorItem = ({
           >
             {data.marked ? <IoBookmarks /> : <IoBookmarksOutline />}
           </Button> */}
-          <Button onClick={handleCheck} size="small">
+          <Button disabled={disabled} onClick={handleCheck} size="small">
             {data.status ? "Reviewed" : "Pending"}
           </Button>
         </div>
@@ -314,6 +308,7 @@ const IndicatorItem = ({
         {data.subIndicator &&
           Object.values(data.subIndicator).map((item, index) => (
             <IndicatorItem
+            disabled={disabled}
               fieldList={fieldList}
               setIndicatorList={setIndicatorList}
               indicatorList={indicatorList}

@@ -1,28 +1,37 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../../server/api/axios";
 import { handleGetUserInfo } from "../../../provider/UserDataProvider";
+import { handleGetUserList } from "../../../utils/_list";
 import {
   hanldeSearchItem,
   handleSearchName,
 } from "../_external-function/_handleGetFieldName";
+import { handleGenerateDate } from "../../../provider/CurrentDateProvider";
 
 import Layout from "../../../components/Layout";
 import IndicatorItem from "./IndicatorItem";
-import Tooltip from "../../../components/Tooltip";
 import Button from "../../../components/Button";
 import Spinner from "../../../components/Spinner";
+import ModalReturn from "./ModalReturn";
+import ModalArchive from "./ModalArchive";
+import Modal from "../../../components/Modal";
+import Avatar from "../../../components/Avatar";
+import Tooltip from "../../../components/Tooltip";
 
-import { FaExclamation } from "react-icons/fa6";
+import { Avatar as GroupAvatars } from "antd";
+
 import { BsExclamationCircle } from "react-icons/bs";
 import { IoIosRefresh } from "react-icons/io";
+import { IoArchiveOutline } from "react-icons/io5";
 
 import { Typography, message } from "antd";
 import { useQuery } from "@tanstack/react-query";
 
 import { handleGetLocal } from "../../../utils/localStorage";
 
-import { AreaProps } from "../../../interface/compliance";
+import { AreaProps, LocaleListProps } from "../../../interface/compliance";
+import { UserProps } from "../../../interface/manage";
 
 interface ComplianceDataProps {
   fieldAnswers: string;
@@ -35,12 +44,9 @@ interface ComplianceDataProps {
   zipCode: string;
   senderInfo: UserProps;
   parsedAnswer: IndicatorsProps[];
-  checkedBy: string
-}
-
-interface RequirementsProps {
-  condition: string;
-  value: { id: string; query: string; status: boolean }[];
+  checkedBy: string;
+  reviewed: string;
+  userList: UserProps[];
 }
 
 interface ValueProps {
@@ -70,21 +76,6 @@ interface IndicatorsProps {
   notice: string;
 }
 
-interface NotifyProps {
-  prob: string;
-  id: string;
-  status: boolean;
-}
-
-interface UserProps {
-  userName: string;
-  profilePicture: string;
-  userType: string;
-  userFullName: string;
-  userZoneId: number;
-  userAddress: string;
-}
-
 interface FieldProps {
   id: string;
   title: string;
@@ -95,11 +86,6 @@ interface FieldProps {
   pushKey: string;
 }
 
-interface MunicipalProps {
-  municipalityName: string;
-  zipCode: number;
-}
-
 const ComplianceData = () => {
   const { complianceID, zipCode } = useParams();
   const [messageApi, contextMessage] = message.useMessage();
@@ -108,6 +94,11 @@ const ComplianceData = () => {
   const [allField, setAllField] = useState<AreaProps[] | []>();
   const [refreshIsLoading, setRefreshIsLoading] = useState<boolean>(false);
   const [isGetting, setIsGetting] = useState<boolean>(false);
+  const [onReturn, setReturn] = useState<boolean>(false);
+  const [onArchive, setArchive] = useState<boolean>(false);
+  const [onMore, setonMore] = useState<boolean>(false);
+
+ const navigate = useNavigate()
 
   const handleFetchComplianceData = async () => {
     setIsGetting(true);
@@ -121,6 +112,7 @@ const ComplianceData = () => {
       if (response.status === 200 && response.data) {
         const data = response.data;
         const user = await handleGetUserInfo(data.sender);
+        const userList = await handleGetUserList(data.checkedBy);
         const parsedAnswerKey: IndicatorsProps[] = JSON.parse(
           data.fieldAnswers
         );
@@ -128,6 +120,7 @@ const ComplianceData = () => {
           ...data,
           senderInfo: { ...user },
           parsedAnswer: parsedAnswerKey,
+          userList: Object.values(userList.data),
         };
         localStorage.setItem(`${data.pushKey}`, JSON.stringify(temp));
         const localData = localStorage.getItem(`${data.pushKey}`);
@@ -200,6 +193,7 @@ const ComplianceData = () => {
         const response = await axios.get(`/data/audit-fields`);
         if (response.status === 200) {
           const data: AreaProps[] = response.data;
+
           setAllField(data);
           return;
         } else {
@@ -218,21 +212,6 @@ const ComplianceData = () => {
     handleGetFieldNames();
     return () => setAllField([]);
   }, []);
-
-  // const {
-  //   data: fieldList,
-  //   isLoading,
-  //   isError,
-  // } = useQuery({
-  //   queryKey: ["fieldList"],
-  //   queryFn: () => axios.get("/data/audit-fields"),
-  // });
-
-  // useEffect(() => {
-  //   if (!fieldList?.data && isError) {
-  //     messageApi.error(`Sorry something went wrong.`);
-  //   }
-  // }, [fieldList, isError]);
 
   const {
     data: municipalList,
@@ -259,6 +238,42 @@ const ComplianceData = () => {
       messageApi.error(`Sorry something went wrong: ${error}`);
     } finally {
       setRefreshIsLoading(false);
+    }
+  };
+
+  const handleReturn = async () => {
+    const date = await handleGenerateDate();
+    try {
+      const response = await axios.post(`/data/return-compliance`, {
+        complianceID,
+        zipCode,
+        date,
+      });
+      if (response.status === 200) {
+        setReturn(false);
+        messageApi.success(`Success!`);
+      }
+    } catch (error) {
+      messageApi.error(`Sorry something went wrong`);
+    }
+  };
+
+  const handleArchived = async () => {
+    const date = await handleGenerateDate();
+    try {
+      const response = await axios.post(`/data/archive-compliance`, {
+        complianceID,
+        zipCode,
+        date,
+        data: {...data}
+      });
+      if (response.status === 200) {
+        setArchive(false);
+        history.back()
+        messageApi.success(`Success!`);
+      }
+    } catch (error) {
+      messageApi.error(`Sorry something went wrong`);
     }
   };
 
@@ -297,7 +312,12 @@ const ComplianceData = () => {
           }}
         >
           <div
-            style={{ width: "100%", padding: "10px", border: "1px solid #ccc", backgroundColor: "#fff" }}
+            style={{
+              width: "100%",
+              padding: "10px",
+              border: "1px solid #ccc",
+              backgroundColor: "#fff",
+            }}
           >
             <div style={{ display: "flex" }}>
               <Typography style={{ width: "150px" }}>Field: </Typography>
@@ -312,11 +332,11 @@ const ComplianceData = () => {
               </Typography>
             </div>
             <div style={{ display: "flex" }}>
-              <Typography style={{ width: "150px" }}>Municipal: </Typography>
+              <Typography style={{ width: "150px" }}>Locale: </Typography>
               <Typography style={{ width: "100%", fontWeight: "bold" }}>
                 {handleSearchName(
                   data?.zipCode as string,
-                  municipalList?.data as MunicipalProps[]
+                  municipalList?.data as LocaleListProps[]
                 )}
               </Typography>
             </div>
@@ -344,19 +364,67 @@ const ComplianceData = () => {
                   </Tooltip>
                 ) : null}
               </div>
-
-
             </div>
 
-            <div style={{width: "100%", height: "auto",}}>
-                <div>
-                  <Typography>More</Typography>
+            <div style={{ display: "flex" }}>
+              <Typography style={{ width: "150px" }}>Status: </Typography>
+              <Typography style={{ width: "100%", fontWeight: "bold" }}>
+                {data?.status === "ongoing"
+                  ? "On Review"
+                  : data?.status === "done"
+                  ? "Done"
+                  : ""}
+              </Typography>
+            </div>
+
+            <div style={{ width: "100%", height: "auto" }}>
+              <div>
+                <Typography
+                  onClick={() => setonMore(!onMore)}
+                  style={{ fontWeight: 500, cursor: "pointer", width: "auto" }}
+                >
+                  {onMore ? "Hide" : "More"}
+                </Typography>
+              </div>
+
+              <div
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: onMore ? "block" : "none",
+                  padding: "8px",
+                }}
+              >
+                <div style={{ display: "flex", gap: "16px" }}>
+                  <Typography>Date Reviewed:</Typography>
+                  <Typography style={{ fontWeight: 600 }}>
+                    {data?.reviewed || "Not applicable"}
+                  </Typography>
                 </div>
 
-                <div style={{width: "100%", height: "auto",}}>
-
+                <div
+                  style={{
+                    display:
+                      data && data?.userList.length < 1 ? "none" : "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography style={{ width: "120px" }}>
+                    Viewed by:
+                  </Typography>
+                  <GroupAvatars.Group maxCount={10}>
+                    {data?.userList &&
+                      Object.values(data?.userList).map((item) => (
+                        <Tooltip title={item.userFullName}>
+                          <>
+                            <Avatar size={25} src={item.userProfilePicture} />
+                          </>
+                        </Tooltip>
+                      ))}
+                  </GroupAvatars.Group>
                 </div>
               </div>
+            </div>
           </div>
 
           <div
@@ -364,16 +432,18 @@ const ComplianceData = () => {
               width: "100%",
               display: "flex",
               justifyContent: "flex-end",
-              gap: "8px"
+              gap: "8px",
             }}
           >
-            {/* <Tooltip enterDelay={1.5} title="Refresh for updates">
+            <Tooltip enterDelay={1.5} title="Refresh for updates">
               <>
                 <Button
-                  onClick={handleRefregh}
+                  disabled={data?.status === "done"}
+                  onClick={() => setReturn(true)}
                   size="small"
+                  style={{ backgroundColor: "" }}
                 >
-                  Done
+                  {data?.status === "done" ? "Reviewed" : "Mark"}
                 </Button>
               </>
             </Tooltip>
@@ -382,13 +452,13 @@ const ComplianceData = () => {
               <>
                 <Button
                   loading={refreshIsLoading}
-                  onClick={handleRefregh}
+                  onClick={()=> setArchive(true)}
                   size="small"
                 >
-                  {!refreshIsLoading && <IoIosRefresh />}
+                 <IoArchiveOutline />
                 </Button>
               </>
-            </Tooltip> */}
+            </Tooltip>
 
             <Tooltip enterDelay={1.5} title="Refresh for updates">
               <>
@@ -413,7 +483,8 @@ const ComplianceData = () => {
             {indicatorList &&
               indicatorList.map((item, index) => (
                 <IndicatorItem
-                key={index}
+                disabled={data?.status === "done"}
+                  key={index}
                   fieldList={allField as FieldProps[]}
                   setIndicatorList={setIndicatorList}
                   indicatorList={indicatorList}
@@ -421,11 +492,26 @@ const ComplianceData = () => {
                   setDataList={setData}
                   dataList={data}
                   data={item}
+                  
                 />
               ))}
           </div>
         </div>
       )}
+      <Modal
+      title="Mark this compliance as 'Reviewed'"
+        onFunction={handleReturn}
+        children={<ModalReturn />}
+        openModal={onReturn}
+        setCloseModal={() => setReturn(false)}
+      />
+      <Modal
+      title="Archive this compliance"
+        onFunction={handleArchived}
+        children={<ModalArchive />}
+        openModal={onArchive}
+        setCloseModal={() => setArchive(false)}
+      />
     </Layout>
   );
 };

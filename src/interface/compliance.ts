@@ -40,13 +40,15 @@ export interface ComplianceDataProps {
   zipCode: string;
   checkedBy: string
   title: string;
-  localeName: string
+  localeName: string;
+  archived: boolean
 }
 
 export interface LocaleListProps {
   municipalityName: string;
   zipCode: string;
-  type:string
+  type:string;
+
 }
 
 export interface CollapseItem {

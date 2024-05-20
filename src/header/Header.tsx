@@ -50,7 +50,7 @@ const Header = () => {
       }}
     >
       <div className="left-header">
-        <Image className="logo" width={40} src={LOGO} />
+        <Image className="logo" width={40} src={"https://firebasestorage.googleapis.com/v0/b/audit-tracker-d4e91.appspot.com/o/newDILG.png?alt=media&token=0bbfa570-0f69-4b55-8fa3-26cece766830" || LOGO} />
         <Typography.Title level={4}>
           Department of the Interior and Local Government
         </Typography.Title>

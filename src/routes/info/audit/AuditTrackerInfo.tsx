@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../../server/api/axios";
@@ -7,23 +7,13 @@ import { Typography, Skeleton, message } from "antd";
 import Layout from "../../../components/Layout";
 import Modal from "../../../components/Modal";
 import Button from "../../../components/Button";
-import Rsults from "../../../components/Rsults";
 import { EditOutlined } from "@ant-design/icons";
 
-import ArchiveField from "./ArchiveField";
-
-import { handleArchiveField } from "./_server/_handleArchive";
-import { formattedDate } from "../../../provider/DateProvider";
 import { convertToArrays } from "../../../pages/manage-users/_sglg/update/_functions";
 
 interface RequirementsProps {
   condition: string;
   value: { id: string; query: string; status: boolean }[];
-}
-
-interface ValueProps {
-  title: string;
-  key: string;
 }
 
 interface IndicatorsProps {
@@ -67,14 +57,7 @@ interface HoverIDProps {
 const AuditTrackerInfo = () => {
   const [currentField, setCurrrentField] = useState<FieldProps | null>(null);
   const [hoverID, setHoverID] = useState<HoverIDProps | undefined>(undefined);
-  const [archiveField, setArchiveField] = useState<boolean>(false);
   const [onUpdate, setOnUpdate] = useState<boolean>(false);
-  const [archiveFieldLoading, setArchiveFieldLoading] =
-    useState<boolean>(false);
-  const [archiveFieldStatus, setArchiveFieldStatus] = useState<{
-    message: string;
-    status: string;
-  } | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -82,19 +65,6 @@ const AuditTrackerInfo = () => {
   const { auditID, fieldID } = useParams();
 
   const navigate = useNavigate();
-
-  console.log(currentField);
-
-  const handleHoverEnter = (
-    id: string,
-    event: React.MouseEvent<HTMLDivElement>
-  ) => {
-    const currentTarget = event.currentTarget as HTMLDivElement; // Explicitly type currentTarget
-
-    if (!currentTarget.contains(event.relatedTarget as Node)) {
-      setHoverID({ id });
-    }
-  };
 
   const handleGetCurrentField = async () => {
     setIsLoading(true);
@@ -120,20 +90,6 @@ const AuditTrackerInfo = () => {
     return () => setCurrrentField(null);
   }, []);
 
-  const handleFieldArchive = async () => {
-    if (fieldID === undefined) return;
-
-    setArchiveFieldLoading(true);
-    try {
-      await handleArchiveField(fieldID, setArchiveFieldStatus, formattedDate);
-      setArchiveField(false);
-      if (archiveFieldStatus?.status === "success") {
-        setArchiveField(false);
-      }
-    } catch (error) {
-      messageApi.error(`${error}`);
-    }
-  };
 
   const handleUpdate = () => {
     setOnUpdate(false);
@@ -179,32 +135,7 @@ const AuditTrackerInfo = () => {
         overflow: "auto",
       }}
     >
-      {archiveFieldStatus?.status === "success" && (
-        <Rsults
-          status={archiveFieldStatus.status}
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            margin: "auto",
-            width: "600px",
-            height: "400px",
-            backgroundColor: "#fff",
-            boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-            borderRadius: "5px",
-            textAlign: "center",
-            lineHeight: "100px",
-          }}
-          title={`${archiveFieldStatus.message}`}
-          extra={[
-            <Button onClick={() => navigate("/manage/update-audit")}>
-              Back to the field list
-            </Button>,
-          ]}
-        />
-      )}
+
       {contextHolder}
       {isLoading ? (
         <Skeleton />

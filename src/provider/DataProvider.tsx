@@ -11,6 +11,7 @@ import Header from "../header/Header";
 import Spinner from "../components/Spinner";
 
 interface UserProps {
+  userIsArchived: false
   userName: string;
   userProfilePicture: string;
   userType: string;
@@ -18,7 +19,8 @@ interface UserProps {
   userZoneId: number;
   userAddress: string;
   history: any;
-  userPermission: string
+  userPermission: string;
+  userLocaleType: string
 }
 
 interface ProviderProps {

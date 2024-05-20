@@ -9,17 +9,12 @@ import SearchBox from "./SearchBox";
 
 //controller
 import { useSearchParams } from "react-router-dom";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "../../../server/api/axios";
 
 //api
-import { handleGetAllLocale } from "../../api/locale";
+
 
 //interface
-interface ItemProps {
-  zipCode: string;
-  municipalName: string;
-}
+
 
 const menuList = [
   { label: "All", key: `all` },
@@ -44,34 +39,8 @@ const AllCompliance = () => {
     );
   };
 
-  const {
-    fetchNextPage,
-    fetchPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
-    ...result
-  } = useInfiniteQuery({
-    queryKey: ["localeList"],
-    queryFn: ({ pageParam }) => handleGetAllLocale(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    getPreviousPageParam: (
-      firstPage,
-      allPages,
-      firstPageParam,
-      allPageParams
-    ) => firstPage.prevCursor,
-  });
 
-  console.log(result.data);
 
-  const hadnleRefetc = async () => {
-    console.log("Clicked");
-
-    fetchNextPage();
-  };
 
   return (
     <Layout style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
@@ -119,9 +88,7 @@ const AllCompliance = () => {
         </div>
       </div>
 
-      <div style={{ width: "100%", height: "90%" }}>
-        <div onClick={hadnleRefetc}>dasda</div>
-      </div>
+
       <Modal
         okHid={true}
         width={800}

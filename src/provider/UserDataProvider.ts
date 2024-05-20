@@ -1,13 +1,6 @@
 import axios from "../../server/api/axios";
+import { UserProps } from "../interface/manage";
 
-interface UserProps {
-    userName: string;
-    profilePicture: string;
-    userType: string;
-    userFullName: string;
-    userZoneId: number;
-    userAddress: string;
-  }
 
 export const handleGetUserInfo = async (
   username: string
@@ -19,3 +12,5 @@ export const handleGetUserInfo = async (
     throw new Error(`Sorry something went wrong "Jude": ${error}`);
   }
 };
+
+

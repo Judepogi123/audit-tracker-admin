@@ -19,6 +19,7 @@ import { FaLock } from "react-icons/fa";
 import { FaLockOpen } from "react-icons/fa";
 
 import { handleGetLocal, handleSaveLocal } from "../../../utils/localStorage";
+import { handleGenerateDate } from "../../../provider/CurrentDateProvider";
 
 import ModalArchiveArea from "./ModalArchiveArea";
 import ModalLockArea from "./ModalLockArea";
@@ -38,7 +39,6 @@ const AuditInfo = () => {
   const [selectedArea, setSelectedArea] = useState<AreaProps | undefined>(
     undefined
   );
-  const [open, setOpen] = useState<boolean>(false);
   const [archive, setAchive] = useState<boolean>(false);
   const [lock, setLock] = useState<boolean>(false);
   const [archiveIsLoading, setAchiveIsLoading] = useState<boolean>(false);
@@ -173,11 +173,13 @@ const AuditInfo = () => {
       return;
     }
     setAchiveIsLoading(true);
+    const date = await handleGenerateDate()
     try {
       const link = type === "archive" ? "archive" : "lock"
       const request = await axios.post(`/data/${link}-area`, {
         pushKey: selectedArea.pushKey,
-        status: selectedArea.locked
+        status: selectedArea.locked,
+        date
       });
       if (request.status === 200) {
        setAchiveIsLoading(false);
@@ -193,6 +195,13 @@ const AuditInfo = () => {
       setAchiveIsLoading(false);
     }
   };
+
+  const handleOpenOption = (data: AreaProps | undefined)=>{
+    if(selectedArea?.pushKey === data?.pushKey){
+      setSelectedArea(undefined)
+    }
+    setSelectedArea(data)
+  }
 
   // if(areasIsLoading || auditIsLoading){
   //   return (
@@ -210,7 +219,7 @@ const AuditInfo = () => {
       <div
         onClick={(e) => {
           e.stopPropagation();
-          setOpen(false);
+          handleOpenOption(undefined);
         }}
         style={{
           width: "100%",
@@ -256,7 +265,7 @@ const AuditInfo = () => {
       <div
         onClick={(e) => {
           e.stopPropagation();
-          setOpen(false);
+          handleOpenOption(undefined);
         }}
         id="list"
         style={{
@@ -326,13 +335,13 @@ const AuditInfo = () => {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpen(!open);
+                    handleOpenOption({...item});
                   }}
                 >
                   <Popover
                     style={{ zIndex: 1000 }}
                     trigger="click"
-                    open={open}
+                    open={item.pushKey === selectedArea?.pushKey}
                     placement="bottomLeft"
                     content={
                       <div

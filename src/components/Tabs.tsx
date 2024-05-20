@@ -1,6 +1,5 @@
 import React from 'react';
-import type { RadioChangeEvent } from 'antd';
-import { Radio, Tabs as GenTabs } from 'antd';
+import { Tabs as GenTabs } from 'antd';
 
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import axios from "../../../server/api/axios";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
 //layout/ui
 import Layout from "../../components/Layout";
@@ -12,7 +11,6 @@ import Input from "../../components/Input";
 import Radio from "../../components/Radio";
 import { Radio as Radios } from "antd";
 
-import Municipal from "./selection/Municipal";
 
 import { Form, Typography, FormProps } from "antd";
 import { LocaleProps, NewLocaleProps } from "../../interface/locale";
@@ -45,7 +43,6 @@ const NewLocale = () => {
   });
   console.log(formValue);
 
-  const navigate = useNavigate();
 
   const onFinish: FormProps<NewLocaleProps>["onFinish"] = (values) => {
     setFormValue(values);
@@ -58,7 +55,7 @@ const NewLocale = () => {
     console.log("Failed:", errorInfo);
   };
 
-  const { data: localeData, isError } = useQuery({
+  const { data: localeData } = useQuery({
     queryKey: ["lacaleData"],
     queryFn: () => axios.get(`/data/municipalities`),
   });

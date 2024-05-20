@@ -4,11 +4,10 @@ import { getDoc, doc } from "../../../firebase/dbConfig.js";
 
 const router = express.Router();
 
-router.get("/user-info/:username", async (req, res) => {
+router.get("/user-info?:username", async (req, res) => {
   try {
     const request = req.params;
     if (!request.username) return;
-    console.log(request.username);
     const userDoc = doc(firestore, "user_data", request.username);
     const snapshot = await getDoc(userDoc);
     if (snapshot.exists()) {

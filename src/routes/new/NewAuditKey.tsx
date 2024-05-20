@@ -1,14 +1,11 @@
 import React from "react";
 import { v4 as genID } from "uuid";
 
-import { useQuery } from "@tanstack/react-query";
 import axios from "../../../server/api/axios";
 
 import Layout from "../../components/Layout";
 import Input from "../../components/Input";
-import Button from "../../components/Button";
-import Select from "../../components/Select";
-import Checkbox from "../../components/Checkbox";
+
 
 import { Typography } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
@@ -25,32 +22,7 @@ interface NewKeyProps {
 }
 
 const NewAuditKey = ({ messageApi,setFormValue,formValues,keyType }: NewKeyProps) => {
-  let genKey = genID();
-  const handleCheckKey = async (key: string) => {
-    try {
-      const request = await axios.post("/data/", {
-        key: key,
-        type: keyType
-      });
-      if (request.status === 200 && request.data.status === "sucess") {
-        return request.data.status;
-      } else {
-        return request.data.status;
-      }
-    } catch (error) {
-      messageApi.error(`Sorry something went wrong generating key: ${error}`);
-    }
-  };
-  const handleCreateAuditKey = async () => {
-    try {
-      const resultKey = await handleCheckKey(genKey);
-      if (resultKey === "sucess") {
-      } else if (resultKey === "existed") {
-      }
-    } catch (error) {
-      messageApi.error(`Sorry something went wrong: ${error}`);
-    }
-  };
+
 
   return (
     <Layout style={{ width: "100%", height: "auto", backgroundColor: "#fff" }}>

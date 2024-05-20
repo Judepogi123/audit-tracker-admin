@@ -1,0 +1,12 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+* .areaItem:hover {
+  background-color: #caf0f8;
+}
+* .empty-list {
+  width: 100%;
+  height: 100%;
+  display: grid;
+}/*# sourceMappingURL=style.css.map */

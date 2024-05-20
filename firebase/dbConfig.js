@@ -5,6 +5,11 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  orderBy,where,collection,
+  query as fQuery,
+  limit,
+  getDocs,
+  startAfter as fStartAfter
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import {
@@ -24,8 +29,7 @@ import {
   startAfter,
   orderByChild,
   equalTo,
-  startAt,
-  
+  startAt,endAt
 } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 
@@ -61,12 +65,20 @@ export {
   orderByChild,
   startAfter,
   startAt,
+  endAt,
   equalTo,
   off,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   updateDoc,
+  orderBy,
+  fStartAfter,
+  where,
   storageRef,
   uploadBytes,
+  collection,
+  fQuery,
+  limit,
 };

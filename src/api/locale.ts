@@ -1,9 +1,25 @@
 import axios from "../../server/api/axios";
 
-export const handleGetAllLocale = async (pageParams: number) => {
-  const response = await axios.get(`/data/locale`,{params: {page: pageParams}});
-  if (response.status === 200) {
+export const handleGetAllLocale = async (pageParam: string) => {
+  console.log("Checked", pageParam);
+
+  try {
+    const response = await axios.get(`/data/all-locale`, {
+      params: { pageParam },
+    });
     return response.data;
+  } catch (error) {
+    console.log(error);
+    
+    throw new Error(`${error}`);
   }
-  return "Sorry something went wrong";
 };
+
+export const handleRemoveLocale = async(localeID: string)=>{
+  try {
+    const response = await axios.post(`/data/remove-locale`, {params : {localeID}})
+    return response
+  } catch (error) {
+    throw new Error(`${error}`)
+  }
+}

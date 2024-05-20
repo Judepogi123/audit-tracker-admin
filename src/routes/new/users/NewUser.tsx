@@ -128,12 +128,6 @@ const NewUser = () => {
     setOnConfirm(false);
   };
 
-  // const onFinishFailed: FormProps<UserDataProps>["onFinishFailed"] = (
-  //   errorInfo
-  // ) => {
-  //   console.log("Failed:", errorInfo);
-  // };
-
   const handleUserTypeChange = (value: string) => {
     setShowMunicipalSelect(value);
   };

@@ -34,6 +34,7 @@ export interface AreaProps {
   locked: boolean;
   pushKey: string;
   archived: boolean;
+  dateArchived: string
 }
 
 export interface NewArea {
@@ -97,6 +98,7 @@ export interface PermissionsProps {
   users: string;
   archived: string;
   audit: string;
+  fields: string
 }
 
 export interface Items {
@@ -113,6 +115,7 @@ export interface ActivityLogs {
 
 
 export interface UserProps {
+  userIsArchived: boolean
   userName: string;
   userProfilePicture: string;
   userType: string;
@@ -120,5 +123,6 @@ export interface UserProps {
   userZoneId: number;
   userAddress: string;
   history: any;
-  userPermission: string
+  userPermission: string | PermissionsProps;
+  userLocaleType: string
 }

@@ -33,9 +33,9 @@ import NewAudit from "./routes/new/NewAudit";
 import AuditInfo from "./pages/manage-users/_sglg/AuditInfo";
 import NewAreaField from "./pages/manage-users/_sglg/NewAreaField";
 import NewLocale from "./pages/municipalities/NewLocale";
-import AllCompliance from "./pages/compliance/AllCompliance";
+import ResetPassword from "./routes/admin/ResetPassword";
+import Locale from "./routes/info/locale/Locale";
 
-import ComplianceDataProvider from "./provider/ComlianceDataProvider";
 
 import { Layout } from "antd";
 import "./App.css";
@@ -45,7 +45,7 @@ function App() {
     <Layout style={{ width: "100%", height: "100vh" }}>
       <Routes>
         <Route path="/auth/login" element={<Login />} />
-
+        <Route path="/dilg-admin-reset-password" element={<ResetPassword/>}/>
         <Route element={<AuthOutlet fallbackPath="/auth/login" />}>
           <Route path="/" element={<DataProvider children={<Home />} />}>
             <Route
@@ -80,16 +80,18 @@ function App() {
             <Route path="/manage/audit/:auditID" element={<AuditInfo />} />
             <Route path="/manage/audit/:auditID/new-area" element={<NewAreaField />} />
             <Route path="/manage/audit/:auditID/new-area/:areaKey" element={<NewField />} />
+            <Route path="/manage/user/:userID" element={<Profile />} />
 
             <Route path="municipalities" element={<Municipalities />} />
             <Route path="municipalities/new-locale" element={<NewLocale />} />
+            <Route path="municipalities/locale/:localeID" element={<Locale />} />
 
             <Route path="compliance" element={<ComplianceList />}>
               <Route path="compliance/info" element={<ComplyInfo />} />
               <Route path="/compliance/:municipalID" element={<Content />} />
             </Route>
             <Route
-              path="/compliance/:filter/:zipCode/:complianceID"
+              path="/compliance/:zipCode/compliance/:complianceID"
               element={<ComplianceData />}
             />
             <Route path="about" element={<About />} />
