@@ -9,12 +9,10 @@ import AddAudit from "./routes/new/new-audit/AddAudit";
 import Profile from "./routes/info/profile/Profile";
 import DataProvider from "./provider/DataProvider";
 
-import NetworkStatus from "./provider/NetworkStatus";
 
 import Dashboard from "./pages/dashboard/Dashboard";
 import Manage from "./pages/manage-users/Manage";
 import Municipalities from "./pages/municipalities/Municipalities";
-import Compliance from "./pages/compliance/Compliance";
 import About from "./pages/about/About";
 import UserManual from "./pages/user-manual/UserManual";
 import ComplianceList from "./pages/compliance/ComplianceList";
@@ -25,7 +23,6 @@ import UpdateField from "./pages/manage-users/_sglg/update/update/UpdateField";
 import AuditField from "./pages/manage-users/_sglg/update/AuditField";
 import NewField from "./pages/manage-users/_sglg/update/new/NewField";
 import NewUser from "./routes/new/users/NewUser";
-import Content from "./pages/compliance/_content/Content";
 import ComplianceData from "./pages/compliance/_content/ComplianceData";
 import NewAudit from "./routes/new/NewAudit";
 import AuditInfo from "./pages/manage-users/_sglg/AuditInfo";
