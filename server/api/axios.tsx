@@ -1,5 +1,6 @@
 import axios from "axios"
 const dev = "http://localhost:3000"
+const production = "https://audit-tracker-admin.web.app/"
 export default axios.create({
-    baseURL: "https://judepogi123.github.io/audit-tracker"
+    baseURL: production
 })

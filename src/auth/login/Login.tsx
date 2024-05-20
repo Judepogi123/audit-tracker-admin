@@ -18,7 +18,7 @@ interface FormFields {
 }
 
 function Login() {
-  const singnIn = useSignIn();
+  const signIn = useSignIn();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextMessage] = message.useMessage();
@@ -42,10 +42,12 @@ function Login() {
         return;
       }
 
+      const token = response.data.token;
+
       if (
-        singnIn({
+        signIn({
           auth: {
-            token: response.data.token,
+            token: token,
             type: "Bearer",
           },
           userState: {
@@ -56,12 +58,11 @@ function Login() {
         setIsLoading(false);
         navigate("/");
       } else {
-        setIsError(response.data.message);
+        setIsError({ message: "Sign-in failed", target: "", status: false });
         navigate("/auth/login");
       }
     } catch (error) {
       console.log(error);
-
       messageApi.error(`Sorry something went wrong: ${error}`);
     } finally {
       setIsLoading(false);
@@ -88,7 +89,7 @@ function Login() {
           <div className="login-header">
             <div className="title">
               <Typography.Title level={2} color="red">
-                Login
+                Loginn
               </Typography.Title>
             </div>
 

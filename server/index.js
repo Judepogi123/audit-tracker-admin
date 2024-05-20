@@ -37,7 +37,12 @@ const port = 3000;
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: 'https://audit-tracker-admin.web.app/', // replace with your actual frontend URL
+  optionsSuccessStatus: 200 // some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

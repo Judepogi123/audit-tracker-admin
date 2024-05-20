@@ -6,6 +6,7 @@ import { get,ref } from "firebase/database";
 const router = express.Router();
 
 router.get("/system", async (req, res) => {
+  try {
     const systemDataPath = ref(database, "System/auditInfo");
     const systemDataSnapshot = await get(systemDataPath);
     if (systemDataSnapshot.val()) {
@@ -14,7 +15,10 @@ router.get("/system", async (req, res) => {
     } else {
       res.status(404).json({ message: "No system data found!" });
     }
-
+  } catch (error) {
+    res.status(500).json(`${error}`)
+  }
+    
 });
 
 export default router
