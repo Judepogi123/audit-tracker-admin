@@ -1,5 +1,4 @@
 import { useState, useContext, createContext, useEffect } from "react";
-import App from "../App";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 import axios from "../../server/api/axios";
@@ -7,7 +6,6 @@ import { AxiosRequestConfig } from "axios";
 
 import { Layout } from "antd";
 
-import Header from "../header/Header";
 import Spinner from "../components/Spinner";
 
 interface UserProps {
