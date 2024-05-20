@@ -1,8 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { Server } from "socket.io";
-import { createServer } from "node:http";
 
 import systemData from "./routes/manage/systemData.js";
 import login from "./routes/login.js";

@@ -5,7 +5,6 @@ import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
 import Home from "./home/Home";
 import Login from "./auth/login/Login";
 import AuditTrackerInfo from "./routes/info/audit/AuditTrackerInfo";
-import IndicatorInfo from "./routes/info/audit/IndicatorInfo";
 import AddAudit from "./routes/new/new-audit/AddAudit";
 import Profile from "./routes/info/profile/Profile";
 import DataProvider from "./provider/DataProvider";
@@ -23,7 +22,6 @@ import UpdateField from "./pages/manage-users/_sglg/update/update/UpdateField";
 
 
 //nested
-import ComplyInfo from "./routes/info/audit/_comply/ComplyInfo";
 import AuditField from "./pages/manage-users/_sglg/update/AuditField";
 import NewField from "./pages/manage-users/_sglg/update/new/NewField";
 import NewUser from "./routes/new/users/NewUser";
@@ -52,18 +50,7 @@ function App() {
               path="/manage/audit-info/:auditID/area/:fieldID"
               element={<AuditTrackerInfo />}
             />
-            <Route
-              path="/audit-info/:fieldID/indicator-info/:firstIndicator"
-              element={<IndicatorInfo />}
-            />
-            <Route
-              path="/audit-info/:fieldID/indicator-info/:firstIndicator/:secondIndicator"
-              element={<IndicatorInfo />}
-            />
-            <Route
-              path="/audit-info/:fieldID/indicator-info/:firstIndicator/:secondIndicator/:thirdIndicator"
-              element={<IndicatorInfo />}
-            />
+
             <Route path="new-audit" element={<AddAudit />} />
             <Route path="profile" element={<Profile />} />
             <Route index path="dashboard" element={<Dashboard />} />
@@ -87,7 +74,7 @@ function App() {
             <Route path="municipalities/locale/:localeID" element={<Locale />} />
 
             <Route path="compliance" element={<ComplianceList />}>
-              <Route path="compliance/info" element={<ComplyInfo />} />
+
               <Route path="/compliance/:municipalID" element={<Content />} />
             </Route>
             <Route
