@@ -10,6 +10,9 @@ import Select from "../../../components/Select";
 import { Radio as Radios } from "antd";
 import Spinner from "../../../components/Spinner";
 import Modal from "../../../components/Modal";
+import Loading from "../../../components/Loading";
+
+import ProfileUpload from "../upload/ProfileUpload";
 
 //controller
 import { useQuery } from "@tanstack/react-query";
@@ -21,9 +24,6 @@ import { handleGetUserInfo } from "../../../provider/UserDataProvider";
 import { UserProps } from "../../../interface/manage";
 import { OptionProps } from "../../../interface/compliance";
 import { PermissionsProps } from "../../../interface/manage";
-
-//utils
-import { handleSaveLocal, handleGetLocal } from "../../../utils/localStorage";
 
 //context
 import { useUserData } from "../../../provider/DataProvider";
@@ -45,8 +45,10 @@ const Profile = () => {
   const [edited, setEdited] = useState<boolean>(false);
   const [onConfirm, setOnConfirm] = useState<boolean>(false);
   const [onUpdate, setOnUpdate] = useState<boolean>(false);
-  const [isArchiving, setIsArchiving] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [onReset, setOnReset] = useState<boolean>(false);
+  const [onUpload, setOnUpload] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [onRemove, setOnRemove] = useState<boolean>(false);
   const [permission, setPermission] = useState<PermissionsProps | undefined>();
 
   const { userID } = useParams();
@@ -56,8 +58,6 @@ const Profile = () => {
     queryKey: ["userInfo"],
     queryFn: () => handleGetUserInfo(userID as string),
   });
-
-  console.log(permission?.archived);
 
   useEffect(() => {
     const handleUserInfo = () => {
@@ -123,16 +123,24 @@ const Profile = () => {
     setEdited(true);
   }, [permission, initialData]);
 
+  const handleReload = async()=>{
+    try {
+      await refetch()
+    } catch (error) {
+      messageApi.error(`Something wrong with reloading: ${error}`)
+    }
+  }
+
   const handleArchiveSelectedUser = async () => {
-    setIsArchiving(true);
+    setLoading(true);
     try {
       const request = await axios.post(`/data/archive-user`, {
         username: userData?.userName,
         status: userData?.userIsArchived,
       });
       if (request.status === 200) {
-        setOnEdit(false)
-        setIsArchiving(false);
+        setOnEdit(false);
+        setLoading(false);
         setOnConfirm(false);
         messageApi.success(`Success!`);
         refetch();
@@ -141,11 +149,13 @@ const Profile = () => {
       messageApi.error(`Faild!`);
     } catch (error) {
       messageApi.error(`Sorry something went wrong: ${error}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdateProfile = async () => {
-    setIsUpdating(true);
+    setLoading(true);
     try {
       const request = await axios.post(`/data/update-user`, {
         userName: initialData?.userName,
@@ -154,16 +164,61 @@ const Profile = () => {
       if (request.status === 200) {
         refetch();
         setOnUpdate(false);
-        setIsUpdating(false);
+        setLoading(false);
         messageApi.success("Success!");
         return;
       }
       messageApi.error("Failed");
     } catch (error) {
-      console.log(error);
       messageApi.error(`Sorry something went wrong: ${error}`);
     } finally {
-      setIsUpdating(false);
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!userData) {
+      messageApi.warning(`Invalid username!`);
+      return;
+    }
+    setLoading(true);
+    try {
+      const request = await axios.post(`/auth/reset-password`, {
+        username: userData?.userName,
+        password: `${userData.userName}-dilg`,
+      });
+      if (request.status === 200 && request.data.status === "ok") {
+        console.log(`${userData.userName}-dilg`);
+        setOnReset(false);
+        setLoading(false);
+        messageApi.success(`Success!`);
+        return;
+      }
+      messageApi.error(`${request.data.message}`);
+    } catch (error) {
+      messageApi.error(`Sorry something went wrong: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    setLoading(true);
+    try {
+      const request = await axios.delete("/data/delete-user", {
+        params: { username: userData?.userName },
+      });
+      if (request.status === 200) {
+        messageApi.success("Success!");
+        setLoading(false);
+        history.back();
+      }
+    } catch (error) {
+      console.log(error);
+
+      messageApi.error(`Sorry something went wrong`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -201,9 +256,15 @@ const Profile = () => {
             display: "flex",
             justifyContent: "center",
             padding: "16px",
+            alignItems: "center",
+            flexDirection: "column",
+            gap: "8px",
           }}
         >
           <Avatar src={userData?.userProfilePicture || "null"} size={160} />
+          {userData?.userName === user.userName && (
+            <Button onClick={() => setOnUpload(true)}>Upload</Button>
+          )}
         </div>
 
         <div
@@ -252,6 +313,7 @@ const Profile = () => {
             </Typography>
             {onEdit ? (
               <Input
+                disabled
                 value={onEdit ? userData?.userName || "Unknown" : ""}
                 size={"small"}
                 placeholder={""}
@@ -309,7 +371,9 @@ const Profile = () => {
                   ? "Provincial"
                   : userData?.userLocaleType === "municipal"
                   ? "Field"
-                  : "Barangay" || "Unknown"}
+                  : userData?.userLocaleType === "barangay"
+                  ? "Barangay"
+                  : "Unknown"}
               </Typography>
             )}
           </div>
@@ -340,8 +404,7 @@ const Profile = () => {
 
       <Divider />
 
-      {typeof permission === "object" &&
-      userData?.userLocaleType === "provincial" ? (
+      {userData?.userLocaleType === "provincial" ? (
         <div
           style={{
             width: "100%",
@@ -479,9 +542,12 @@ const Profile = () => {
           padding: "8px",
         }}
       >
-        <Button onClick={() => setOnEdit(!onEdit)}>
-          {onEdit ? "Cancel" : "Edit"}
-        </Button>
+        {user.userName === userData?.userName || user.userPermission === "all" && (
+          <Button onClick={() => setOnEdit(!onEdit)}>
+            {onEdit ? "Cancel" : "Edit"}
+          </Button>
+        )}
+
         {onEdit && (
           <Button
             disabled={!edited}
@@ -495,10 +561,13 @@ const Profile = () => {
         <Button onClick={() => setOnConfirm(true)}>
           {userData?.userIsArchived === true ? "Unarchive" : "Archive"}
         </Button>
-        <Button>Reset password</Button>
+        <Button onClick={() => setOnReset(true)}>Reset password</Button>
+        {userData?.userPermission || user.userPermission === "all" ? (
+          <Button onClick={()=> setOnRemove(true)}>Remove user</Button>
+        ) : null}
       </div>
+      {/* Archive user */}
       <Modal
-        loading={isArchiving}
         onFunction={handleArchiveSelectedUser}
         width={400}
         title={`${user.userIsArchived ? "Unarchive" : "Archive"} user: ${
@@ -508,14 +577,67 @@ const Profile = () => {
         openModal={onConfirm}
         setCloseModal={() => setOnConfirm(false)}
       />
+
+      {/* Update profile */}
       <Modal
-        loading={isUpdating}
         onFunction={handleUpdateProfile}
         width={400}
         title={`Update user: ${userData?.userFullName}`}
         children={"Save update?"}
         openModal={onUpdate}
         setCloseModal={() => setOnUpdate(false)}
+      />
+
+      {/* Resest Password */}
+      <Modal
+        onFunction={handleResetPassword}
+        width={400}
+        title={`Reset password of user: ${userData?.userFullName}`}
+        children={"The reset password is the `<username>-dilg`"}
+        openModal={onReset}
+        setCloseModal={() => setOnReset(false)}
+      />
+
+      {/* Update Profile */}
+      <Modal
+        okHid={true}
+        width={600}
+        title={`Update profile picture`}
+        children={
+          <ProfileUpload
+          handleReload={handleReload}
+            setLoading={setLoading}
+            messageApi={messageApi}
+            setOnUpload={setOnUpload}
+          />
+        }
+        openModal={onUpload}
+        setCloseModal={() => setOnUpload(false)}
+      />
+
+      {/* loading */}
+      <Modal
+        cancelHid={true}
+        okHid={true}
+        width={400}
+        children={<Loading type={"classic"} />}
+        openModal={loading}
+        setCloseModal={() => {
+          if (loading) {
+            return;
+          }
+          setLoading(false);
+        }}
+      />
+
+    {/* !!!Remove user */}
+      <Modal
+      onFunction={handleDeleteUser}
+        width={400}
+        title={`Remove user: ${userData?.userFullName}`}
+        children={`By confirming this action, the user will be remove permanently and cannot be undo afterwards.`}
+        openModal={onRemove}
+        setCloseModal={() => setOnRemove(false)}
       />
     </Layout>
   );

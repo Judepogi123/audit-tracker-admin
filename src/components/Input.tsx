@@ -17,17 +17,9 @@ type InputProps = {
   value?: string | number;
   disabled?: boolean,
   name?: string
-  type?:string
+  type?:string;
+  accept?: string
 };
-
-interface UserDataProps {
-  username: string;
-  password: string;
-  assignedMunicipal: string;
-  type: string;
-  adminType?: string;
-  authority: string;
-}
 
 export default function Input({
   size,
@@ -38,10 +30,12 @@ export default function Input({
   style,
   value,
   disabled,
-  name,type
+  name,type,
+  accept
 }: InputProps) {
   return (
     <GenInput
+    accept={accept}
     type={type}
     disabled={disabled}
       value={value}

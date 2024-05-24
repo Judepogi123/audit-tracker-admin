@@ -3,12 +3,8 @@ import { useParams } from "react-router-dom";
 import Layout from "../../../components/Layout";
 
 import { Typography, message } from "antd";
-
-import Radio from "../../../components/Radio";
-import Checkbox from "../../../components/Checkbox";
 import Modal from "../../../components/Modal";
 import Button from "../../../components/Button";
-import { Radio as Radios } from "antd";
 
 import ViewMOV from "./ViewMOV";
 import CheckIndicator from "./CheckIndicator";
@@ -16,8 +12,6 @@ import NotifyList from "./NotifyList";
 
 import { CiSquareCheck } from "react-icons/ci";
 import { IoNotifications } from "react-icons/io5";
-import { IoBookmarks } from "react-icons/io5";
-import { IoBookmarksOutline } from "react-icons/io5";
 
 //controller
 import axios from "../../../../server/api/axios";
@@ -63,8 +57,8 @@ interface ComplianceDataProps {
   senderInfo: UserProps;
   parsedAnswer: IndicatorsProps[];
   checkedBy: string;
-  reviewed: string
-  userList: UserProps[]
+  reviewed: string;
+  userList: UserProps[];
 }
 
 interface ValueProps {
@@ -83,14 +77,9 @@ type ComplianceIndicator = {
   >;
   indicatorList: IndicatorsProps[] | [] | undefined;
   fieldList: FieldProps[];
-  disabled: boolean
+  disabled: boolean;
+  fieldPushkey: string;
 };
-
-interface NotifyProps {
-  prob: string;
-  id: string;
-  status: boolean;
-}
 
 interface FieldProps {
   id: string;
@@ -110,46 +99,57 @@ const IndicatorItem = ({
   setIndicatorList,
   indicatorList,
   fieldList,
-  disabled
+  disabled,
+  fieldPushkey,
 }: ComplianceIndicator) => {
   const [onView, setOnView] = useState<boolean>(false);
   const [onCheck, setOnCheck] = useState<boolean>(false);
   const [onNotify, setOnNotify] = useState<boolean>(false);
-  const [permission, setPermission] = useState<PermissionsProps | string| null>(null)
+  const [permission, setPermission] = useState<
+    PermissionsProps | string | null
+  >(null);
 
   const { complianceID, zipCode } = useParams();
   const [messageApi, contextMessage] = message.useMessage();
 
-  const user = useUserData()  
+  const user = useUserData();
 
-  useEffect(()=>{
-    const handleUserPersmission = ()=>{
+  useEffect(() => {
+    const handleUserPersmission = () => {
       try {
-        const temp: PermissionsProps = user.userPermission === "all" ? "all" : JSON.parse(user.userPermission);
-        setPermission(temp)
+        const temp: PermissionsProps =
+          user.userPermission === "all"
+            ? "all"
+            : JSON.parse(user.userPermission);
+        setPermission(temp);
       } catch (error) {
-        messageApi.error(`Something went wrong with user permission`)
+        messageApi.error(`Something went wrong with user permission`);
       }
-    }
+    };
 
-    handleUserPersmission()
-    
-    return ()=> setPermission(null)
-  },[user])
+    handleUserPersmission();
 
+    return () => setPermission(null);
+  }, [user]);
 
   const handleViewMOV = () => {
     setOnView(true);
   };
 
   const handleNotify = () => {
-    
     setOnNotify(true);
   };
 
   const handleCheck = () => {
-    if (permission && typeof permission === 'object' && 'compliance' in permission) {
-      if (permission.compliance === "complianceR" || user.userPermission === "all") {
+    if (
+      permission &&
+      typeof permission === "object" &&
+      "compliance" in permission
+    ) {
+      if (
+        permission.compliance === "complianceR" ||
+        user.userPermission === "all"
+      ) {
         messageApi.warning(`Current user is not authorized for this action!`);
         return;
       }
@@ -158,8 +158,15 @@ const IndicatorItem = ({
   };
 
   const handleUpdateStatue = async (id: string, status: boolean) => {
-    if (permission && typeof permission === 'object' && 'compliance' in permission) {
-      if (permission.compliance === "complianceR" || user.userPermission === "all") {
+    if (
+      permission &&
+      typeof permission === "object" &&
+      "compliance" in permission
+    ) {
+      if (
+        permission.compliance === "complianceR" ||
+        user.userPermission === "all"
+      ) {
         messageApi.warning(`Current user is not authorized for this action!`);
         return;
       }
@@ -196,7 +203,6 @@ const IndicatorItem = ({
       messageApi.error(`Sorry somethimg went wrong: ${error}`);
     }
   };
-  
 
   return (
     <Layout
@@ -218,7 +224,7 @@ const IndicatorItem = ({
         }}
       >
         <div style={{ width: "100%", padding: "10px" }}>
-          <Typography style={{fontWeight: 700}}>{data.query}</Typography>
+          <Typography style={{ fontWeight: 700 }}>{data.query}</Typography>
         </div>
         <div
           style={{
@@ -228,7 +234,9 @@ const IndicatorItem = ({
             padding: "0px 20px",
           }}
         >
-          <Typography style={{ width: "80px",fontWeight: 500 }}>Response: </Typography>
+          <Typography style={{ width: "80px", fontWeight: 500 }}>
+            Response:{" "}
+          </Typography>
           <div
             style={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
@@ -267,10 +275,10 @@ const IndicatorItem = ({
             display: data.dataInputMethod.type === "null" ? "none" : "flex",
             justifyContent: "flex-end",
             gap: "5px",
-            padding: "8px"
+            padding: "8px",
           }}
         >
-          <Button size="small" onClick={handleViewMOV}>
+          <Button size="small" disabled={disabled} onClick={handleViewMOV}>
             View MOV (
             {(data.movFiles !== undefined &&
               Object.values(JSON.parse(data.movFiles as string)).length) ||
@@ -279,18 +287,13 @@ const IndicatorItem = ({
           </Button>
 
           <Button
+            disabled={disabled}
             onClick={handleNotify}
             size="small"
             style={{ backgroundColor: "#0096c7" }}
           >
             <IoNotifications color="#f1f1f1" />
           </Button>
-          {/* <Button
-            onClick={() => handleUpdateMark(data.pushKey, data.marked)}
-            size="small"
-          >
-            {data.marked ? <IoBookmarks /> : <IoBookmarksOutline />}
-          </Button> */}
           <Button disabled={disabled} onClick={handleCheck} size="small">
             {data.status ? "Reviewed" : "Pending"}
           </Button>
@@ -308,7 +311,8 @@ const IndicatorItem = ({
         {data.subIndicator &&
           Object.values(data.subIndicator).map((item, index) => (
             <IndicatorItem
-            disabled={disabled}
+              fieldPushkey={fieldPushkey}
+              disabled={disabled}
               fieldList={fieldList}
               setIndicatorList={setIndicatorList}
               indicatorList={indicatorList}
@@ -334,6 +338,7 @@ const IndicatorItem = ({
         width={600}
         children={
           <NotifyList
+            fieldPushkey={fieldPushkey}
             setOnNotify={setOnNotify}
             query={data.query}
             pushKey={data.pushKey}

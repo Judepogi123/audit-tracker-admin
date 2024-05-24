@@ -8,7 +8,7 @@ import Select from "../../../components/Select";
 import Modal from "../../../components/Modal";
 
 // controller
-import { useSearchParams, Outlet } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../../server/api/axios";
 import { handleGetLocal, handleSaveLocal } from "../../../utils/localStorage";
@@ -26,8 +26,7 @@ import { PermissionsProps } from "../../../interface/manage";
 const menuList = [
   { label: "Area", value: "area" },
   { label: "Compliance", value: "compliance" },
-  { label: "Locale", value: "locale" },
-  { label: "Users", value: "users" },
+
 ];
 
 const Archive = () => {

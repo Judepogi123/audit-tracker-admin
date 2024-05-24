@@ -15,7 +15,6 @@ import Radio from "../../components/Radio";
 import Modal from "../../components/Modal";
 import NewAuditKey from "./NewAuditKey";
 import NewAuditConfirmSave from "./NewAuditConfirmSave";
-import KeySelection from "./KeySelection";
 
 import {
   NewAudit as NewAuditProps,

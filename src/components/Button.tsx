@@ -19,7 +19,7 @@ interface ButtonProps  {
 const Button = ({ htmlType, type, children,icon, style,onClick, disabled,loading,size}: ButtonProps) => {
   return (
     <GenButton
-    
+
     size={size}
     loading={loading}
     disabled={disabled}

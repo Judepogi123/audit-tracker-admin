@@ -1,8 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, SetStateAction } from "react";
 import Layout from "../../../components/Layout";
 import Avatar from "../../../components/Avatar";
 import { Typography, message } from "antd";
 import Spinner from "../../../components/Spinner";
+import Modal from "../../../components/Modal";
+import SearchBox from "./SearchBox";
 import "./style.scss";
 
 //api
@@ -15,35 +17,37 @@ import { UserProps } from "../../../interface/manage";
 //controller
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import { useNavigate } from "react-router-dom";
+import {
+  NavigateOptions,
+  URLSearchParamsInit,
+  useNavigate,
+} from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 //context
 import { useUserData } from "../../../provider/DataProvider";
 
 const Users = () => {
   const [userList, setUserList] = useState<UserProps[]>([]);
-  const [messageApi, contextMessage] = message.useMessage()
+  const [searchParams, setSearchParams] = useSearchParams({ query: "" });
+  const [messageApi, contextMessage] = message.useMessage();
   const scrollPosition = useRef(0);
 
+  const currentQuery = searchParams.get("query");
+  const [onSearch, setOnSearch] = useState<boolean>(false);
   const user: UserProps = useUserData();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { ref: inViewRef, inView } = useInView();
 
-  const {
-    fetchNextPage,
-    data,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey: ["userData"],
-    queryFn: ({ pageParam = "initial" }) => handleFetchUser(pageParam),
-    initialPageParam: "initial",
-    getNextPageParam: (lastPage) => {
-      if (lastPage && Object.values(lastPage).length === 0) return 1;
-      return lastPage.lastVisible;
-    },
-  });
-  
+  const { fetchNextPage, data, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["userData"],
+      queryFn: ({ pageParam = "initial" }) => handleFetchUser(pageParam),
+      initialPageParam: "initial",
+      getNextPageParam: (lastPage) => {
+        if (lastPage && Object.values(lastPage).length === 0) return 1;
+        return lastPage.lastVisible;
+      },
+    });
 
   useEffect(() => {
     if (data?.pages) {
@@ -64,7 +68,8 @@ const Users = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      scrollPosition.current = document.documentElement.scrollTop || document.body.scrollTop;
+      scrollPosition.current =
+        document.documentElement.scrollTop || document.body.scrollTop;
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -86,8 +91,8 @@ const Users = () => {
   return (
     <Layout style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
       {contextMessage}
-      <div style={{ width: "100%", height: "10%", border: "1px solid #ccc" }}>
-        <UserFieldHeader />
+      <div style={{ width: "100%", height: "10%" }}>
+        <UserFieldHeader setOnSearch={setOnSearch} currentQuery={currentQuery} />
       </div>
 
       <div
@@ -130,7 +135,7 @@ const Users = () => {
               }
               return 0;
             })
-            .map((item, index) => (
+            .map((item) => (
               <div
                 onClick={() => handleViewUser(item.userName)}
                 className="item"
@@ -185,6 +190,20 @@ const Users = () => {
           </div>
         )}
       </div>
+      <Modal
+      okHid={true}
+      title="Search user"
+      width={800}
+        children={
+          <SearchBox
+            currentQuery={null}
+            setSearchParams={setSearchParams}
+            setOnSearch={setOnSearch}
+          />
+        }
+        openModal={onSearch}
+        setCloseModal={()=> setOnSearch(false)}
+      />
     </Layout>
   );
 };

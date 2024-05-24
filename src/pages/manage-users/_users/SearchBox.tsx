@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import axios from "../../../server/api/axios";
-import Layout from "../../components/Layout";
-import Input from "../../components/Input";
-import { Typography,message } from "antd";
+
+import axios from "../../../../server/api/axios";
+
+import Layout from "../../../components/Layout";
+import Input from "../../../components/Input";
+import { Typography, message } from "antd";
 import Lottie from "lottie-react";
+import Avatar from "../../../components/Avatar";
 
-import typingAni from "../../assets/animations/typing-001.json";
+import typingAni from "../../../assets/animations/typing-001.json";
 
-import { NavigateOptions, URLSearchParamsInit,useNavigate } from "react-router-dom";
+import {
+  NavigateOptions,
+  URLSearchParamsInit,
+  useNavigate,
+} from "react-router-dom";
 
-import { LocaleListProps } from "../../interface/compliance";
+import { UserProps } from "../../../interface/manage";
 
 interface SearchProps {
   currentQuery: string | null;
@@ -21,34 +28,35 @@ interface SearchProps {
       | undefined,
     navigateOpts?: NavigateOptions | undefined
   ) => void;
-  setOnSearch: React.Dispatch<React.SetStateAction<boolean>>
+  setOnSearch: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) => {
-  const [results, setResults] = useState<LocaleListProps[] | []>();
+const SearchBox = ({
+  currentQuery,
+  setSearchParams,
+  setOnSearch,
+}: SearchProps) => {
+  const [results, setResults] = useState<UserProps[] | []>();
   const [searchTerm, setSearchTerm] = useState(currentQuery || "");
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [messageApi,contextMessage] = message.useMessage()
+  const [messageApi, contextMessage] = message.useMessage();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSearchItem = async (query: string) => {
     if (query === "" || !query) return;
     setIsSearching(true);
 
     try {
-      const response = await axios.get(`/data/search-locale`, {
-        params: { searchTerm: query },
+      const response = await axios.get(`/data/search-user`, {
+        params: { searchQuery: query },
       });
       if (response.status === 200) {
-        const data: LocaleListProps[] = response.data;
+        const data: UserProps[] = response.data;
         setResults(data);
         setIsSearching(false);
-        console.log(response.data);
-        console.log("Success!");
       }
-      // handle the response as needed
     } catch (error) {
       console.error("Error fetching search results:", error);
     } finally {
@@ -75,24 +83,43 @@ const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) =>
     debouncedSearch(value);
   };
 
-  const handleViewLocale = (value: string)=>{
+  const handleViewLocale = (value: string) => {
     try {
-      setOnSearch(false)
-      navigate(`/municipalities/locale/${value}`)
+      setOnSearch(false);
+      navigate(`/manage/user/${value}`);
     } catch (error) {
-      messageApi.error(`Sorry something went wrong: ${error}`)
+      messageApi.error(`Sorry something went wrong: ${error}`);
     }
-  }
+  };
 
-  useEffect(()=>{
-    if(currentQuery === "" || !currentQuery){
-      setResults([])
+  useEffect(() => {
+    if (currentQuery === "" || !currentQuery) {
+      setResults([]);
     }
-  },[currentQuery])
+  }, [currentQuery]);
 
+  useEffect(() => {
+    if (currentQuery === "") {
+      setResults([]);
+      setSearchParams(
+        (prev) => {
+          prev.set("query", "");
+          return prev;
+        },
+        { replace: true }
+      );
+    }
+  }, [currentQuery, searchTerm]);
 
   return (
-    <Layout style={{ width: "100%", height: "auto", maxHeight: "400px",backgroundColor: "#fff" }}>
+    <Layout
+      style={{
+        width: "100%",
+        height: "auto",
+        maxHeight: "400px",
+        backgroundColor: "#fff",
+      }}
+    >
       {contextMessage}
       <div>
         <Input
@@ -104,7 +131,12 @@ const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) =>
           onChange={handleChange}
         />
         <div
-          style={{ width: "100%", display: "flex", justifyContent: "center",backgroundColor: "#fff" }}
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            backgroundColor: "#fff",
+          }}
         >
           {isTyping && (
             <div style={{ width: 50 }}>
@@ -113,14 +145,18 @@ const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) =>
           )}
         </div>
         <div
-          style={{ width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#fff" }}
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            backgroundColor: "#fff",
+          }}
         >
           {isSearching && <Typography>Searching</Typography>}
         </div>
 
         {results && currentQuery !== "" && (
           <div
-         
             style={{
               width: "100%",
               height: "auto",
@@ -129,7 +165,7 @@ const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) =>
               gap: "4px",
               marginTop: "16px",
               overflowY: "auto",
-              backgroundColor: "#fff"
+              backgroundColor: "#fff",
             }}
           >
             {Object.values(results).length === 0 && currentQuery !== "" ? (
@@ -147,27 +183,31 @@ const SearchBox = ({ currentQuery, setSearchParams,setOnSearch}: SearchProps) =>
             ) : (
               Object.values(results)
                 .sort((a, b) => {
-                  if (a.municipalityName < b.municipalityName) {
+                  if (a.userFullName < b.userFullName) {
                     return -1;
                   }
-                  if (a.municipalityName > b.municipalityName) {
+                  if (a.userFullName > b.userFullName) {
                     return 1;
                   }
                   return 0;
                 })
                 .map((item) => (
                   <div
-                  onClick={()=> handleViewLocale(item.zipCode)}
+                    onClick={() => handleViewLocale(item.userName)}
                     style={{
                       width: "100%",
                       padding: "8px",
                       border: "1px solid #ccc",
                       borderRadius: "4px",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center",
                     }}
                   >
+                    <Avatar src={item.userProfilePicture || undefined} />
                     <Typography style={{ fontWeight: 600 }}>
-                      {item.municipalityName}
+                      {item.userFullName}
                     </Typography>
                   </div>
                 ))

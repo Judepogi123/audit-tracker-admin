@@ -1,8 +1,6 @@
 import axios from "../../server/api/axios";
 
 export const handleGetAllLocale = async (pageParam: string) => {
-  console.log("Checked", pageParam);
-
   try {
     const response = await axios.get(`/data/all-locale`, {
       params: { pageParam },

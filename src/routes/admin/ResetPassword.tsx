@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 //ui
 import Layout from "../../components/Layout";
-import { FormProps, Typography, message } from "antd";
+import { FormProps, message } from "antd";
 import Button from "../../components/Button";
 import InputPassword from "../../components/InputPassword";
 import { Form } from "antd";
@@ -14,6 +14,7 @@ import Input from "../../components/Input";
 import Modal from "../../components/Modal";
 
 interface AdminPassword {
+  username: string;
   password: string;
 }
 
@@ -29,12 +30,16 @@ const ResetPassword = () => {
     setIsLoading(true);
     try {
       const request = await axios.post(`/auth/reset-password`, value);
+      console.log(value);
+      
       if (request.status === 200 && request.data.status === "ok") {
         navigate(`/auth/login`);
+        return
       }
-    } catch (error) {
+      messageApi.warning(`${request.data.message}`)
+    } catch (error) {   
       console.log(error);
-      
+         
       messageApi.error(`Sorry somehing went wrong: ${error}`);
     } finally {
       setIsLoading(false);
@@ -47,6 +52,8 @@ const ResetPassword = () => {
   };
 
   const onFinish: FormProps<AdminPassword>["onFinish"] = (values: any) => {
+    console.log(values);
+    
     setValue(values);
     setOnConfirm(true);
   };

@@ -156,7 +156,6 @@ const ComplianceList = () => {
     queryFn: () => axios.get("/data/municipalities"),
   });
 
-  console.log(areas?.data);
 
   const handleFieldCache = async () => {
     try {

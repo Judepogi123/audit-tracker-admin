@@ -4,15 +4,14 @@ import {
   handleGenerateDate,
 } from "../../../provider/CurrentDateProvider";
 import { reasonList } from "./dataSourse";
+import { hanldeSearchItem} from "../_external-function/_handleGetFieldName";
 
 import Layout from "../../../components/Layout";
 import Button from "../../../components/Button";
 import Radio from "../../../components/Radio";
-import Input from "../../../components/Input";
 import Textarea from "../../../components/Textarea";
 
 import {
-  CheckboxProps,
   Typography,
   message,
   Radio as Radios,
@@ -23,7 +22,8 @@ import axios from "../../../../server/api/axios";
 import { useParams } from "react-router-dom";
 import { useUserData } from "../../../provider/DataProvider";
 
-import { PermissionsProps } from "../../../interface/manage";
+import { PermissionsProps,IndicatorsProps,AreaProps } from "../../../interface/manage";
+import { handleGetLocal } from "../../../utils/localStorage";
 
 interface NotifyDataProps {
   query: string;
@@ -35,33 +35,7 @@ interface NotifyDataProps {
   >;
   indicatorList: IndicatorsProps[] | [] | undefined;
   response: string;
-}
-
-interface ValueProps {
-  title: string;
-  key: string;
-}
-
-interface IndicatorsProps {
-  dataInputMethod: {
-    type: null | string;
-    value: ValueProps[] | string | number;
-  };
-  query: string;
-  id: string;
-  mov: string;
-  movDueDate: string | undefined | "null";
-  path: string;
-  title: string;
-  type: "indicator" | "subIndicator";
-  subIndicator: IndicatorsProps[];
-  stage: number;
-  status: boolean;
-  answer: string;
-  movFiles: string;
-  pushKey: string;
-  marked: boolean;
-  notice: string;
+  fieldPushkey: string
 }
 
 const NotifyList = ({
@@ -71,12 +45,14 @@ const NotifyList = ({
   notify,
   indicatorList,
   setIndicatorList,
-  response
+  response,
+  fieldPushkey
 }: NotifyDataProps) => {
   const [notifyList, setNotifyList] =
     useState<{ title: string; dateSent: string }[]>();
   const [messageApi, contextMessage] = message.useMessage();
   const [selected, setSeletected] = useState<string>(reasonList[0].query);
+  const [areaList, setAreaList] = useState<AreaProps[] | []>()
   const [messageText, setMessage] = useState<string | undefined>(undefined);
   const [permission, setPermission] = useState<PermissionsProps | string| null>(null)
   const [sendLoading, setSendIsLoading] = useState<boolean>();
@@ -98,6 +74,21 @@ const NotifyList = ({
     return ()=> setPermission(null)
   },[user])
 
+  const handleGetAreas = async()=>{
+    try {
+      const temp = await handleGetLocal("areasList");
+      const parsed: AreaProps[] = JSON.parse(temp as string);
+      setAreaList(parsed)
+    } catch (error) {
+      messageApi.error(`${error}`)
+    }
+  }
+
+  useEffect(()=>{
+    handleGetAreas()
+    return ()=> setAreaList([])
+  },[])
+
   useEffect(() => {
     const notifyDataList: { title: string; dateSent: string }[] = JSON.parse(
       (notify as string) || "[]"
@@ -106,6 +97,7 @@ const NotifyList = ({
       setNotifyList(notifyDataList);
     }
   }, [notify, indicatorList]);
+
 
   const { complianceID, zipCode } = useParams();
 
@@ -180,6 +172,7 @@ const NotifyList = ({
         date: await handleGenerateDate(),
         complianceID,
         zipCode,
+        title: hanldeSearchItem(fieldPushkey, areaList as AreaProps[])
       });
       if (request.status === 200) {
         setOnNotify(false);

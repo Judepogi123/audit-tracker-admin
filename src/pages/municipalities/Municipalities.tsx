@@ -1,32 +1,26 @@
 import { useEffect, useState } from "react";
 
-//ui
+// UI components
 import Layout from "../../components/Layout";
-import Tabs from "../../components/Tabs";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
 import Button from "../../components/Button";
 import Modal from "../../components/Modal";
 import Spinner from "../../components/Spinner";
-
 import { Typography, message } from "antd";
+import Loading from "../../components/Loading";
 
-//controller
-import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "../../../server/api/axios";
-import { useNavigate,useSearchParams } from "react-router-dom";
-import { useInView } from "react-intersection-observer";
-
-import { handleGetAllLocale } from "../../api/locale";
-
+// Controller and data fetching
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchBox from "./SearchBox";
-
-import { handleGetLocal, handleSaveLocal } from "../../utils/localStorage";
 import { useUserData } from "../../provider/DataProvider";
+import { useDebounce } from "use-debounce";
 
-//interface
+// Interfaces
 import { LocaleProps } from "../../interface/locale";
 import { PermissionsProps } from "../../interface/manage";
+import axios from "../../../server/api/axios";
 
 const menuList = [
   { label: "All", value: "all" },
@@ -34,15 +28,10 @@ const menuList = [
   { label: "Barangay", value: "barangay" },
 ];
 
-interface OptionProps {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
-}
+const queryKey = ["municipalityName", "zipCode"];
 
 const Municipalities = () => {
   const [messageApi, contextMessage] = message.useMessage();
-
   const [localeList, setLocaleList] = useState<LocaleProps[] | null>(null);
   const [permission, setPermission] = useState<PermissionsProps | null>(null);
   const [onSearch, setOnSearch] = useState<boolean>(false);
@@ -55,28 +44,21 @@ const Municipalities = () => {
   const currentQuery = searchParams.get("query");
   const navigate = useNavigate();
   const user = useUserData();
-  const { ref: itemInView, inView } = useInView();
+
+  const [searchQuery] = useDebounce(currentQuery, 500);
 
   const {
-    data: localeData,
-    isFetchingNextPage,
-    error,
+    data: localeDatas,
     isError,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
+    error,
+    isLoading
+  } = useQuery({
     queryKey: ["localeData"],
-    queryFn: ({ pageParam = "initial" }) => handleGetAllLocale(pageParam),
-    initialPageParam: "initial",
-    getNextPageParam: (lastPage) => {
-      if (lastPage && Object.values(lastPage).length === 0) return 1;
-      if(lastPage.nextCursor === "none")return
-      return lastPage.nextCursor;
-    },
+    queryFn: () => axios.get(`/data/locale`),
   });
 
   useEffect(() => {
-    const handleUserPersmission = () => {
+    const handleUserPermission = () => {
       try {
         const temp: PermissionsProps =
           user.userPermission === "all"
@@ -88,7 +70,7 @@ const Municipalities = () => {
       }
     };
 
-    handleUserPersmission();
+    handleUserPermission();
   }, [user]);
 
   const handleNavigate = () => {
@@ -98,7 +80,7 @@ const Municipalities = () => {
       "municipals" in permission
     ) {
       if (
-        permission.municipals === "minicipalR" ||
+        permission.municipals === "municipalR" ||
         user.userPermission === "all"
       ) {
         messageApi.warning(`Current user is not authorized for this action!`);
@@ -113,21 +95,14 @@ const Municipalities = () => {
   };
 
   useEffect(() => {
-    if (localeData?.pages) {
-      const flattenedData: LocaleProps[] = localeData.pages.flatMap(
-        (entry) => entry.locales
-      );
-      setLocaleList(flattenedData);
-      return;
-    }
-    setLocaleList([]);
-  }, [localeData]);
+    if (localeDatas?.data) {
+      const localeDataList: LocaleProps[] = localeDatas?.data;
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
+      setLocaleList(localeDataList);
+    } else {
+      setLocaleList([]);
     }
-  }, [hasNextPage, inView]);
+  }, [localeDatas?.data]);
 
   const handleChangeType = (value: string) => {
     setSearchParams(
@@ -143,24 +118,64 @@ const Municipalities = () => {
     setOnSearch(false);
   };
 
-  const handleSearchItem = (value: string) => {
-    setSearchParams(
-      (prev) => {
-        prev.set("query", value);
-        return prev;
-      },
-      { replace: true }
-    );
+  const handleViewLocale = (value: string) => {
+    try {
+      setOnSearch(false);
+      navigate(`/municipalities/locale/${value}`);
+    } catch (error) {
+      messageApi.error(`Sorry something went wrong: ${error}`);
+    }
   };
 
-  const handleViewLocale = (value: string)=>{
-    try {
-      setOnSearch(false)
-      navigate(`/municipalities/locale/${value}`)
-    } catch (error) {
-      messageApi.error(`Sorry something went wrong: ${error}`)
+  const handleFilter = () => {
+    if (!localeList || localeList.length === 0) {
+      return [];
     }
+    return Object.values(localeList || [])
+      .sort((a, b) => {
+        if (a.municipalityName < b.municipalityName) {
+          return -1;
+        }
+        if (a.municipalityName > b.municipalityName) {
+          return 1;
+        }
+        return 0;
+      })
+      .filter(
+        (item) =>
+          (currentType === "all" || item.type === currentType) &&
+          queryKey.some((key) =>
+            (item as any)[key]
+              ?.toLowerCase()
+              ?.includes(searchQuery?.toLowerCase())
+          )
+      );
+  };
+
+  if (isError) {
+    return (
+      <Layout style={{ width: "100%", height: "100%", display: "grid" }}>
+        <div style={{ margin: "auto" }}>
+          <Typography style={{ fontWeight: 600, fontSize: "1.1rem" }}>
+            Sorry something went wrong
+          </Typography>
+          <Typography>{error.message}</Typography>
+          <Typography>Please try to refresh the page</Typography>
+        </div>
+      </Layout>
+    );
   }
+
+  if(isLoading){
+    return (
+      <Layout style={{ width: "100%", height: "100%", display: "grid" }}>
+        <div style={{ margin: "auto" }}>
+         <Spinner size="large"/>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
       <div style={{ width: "100%", height: "18%" }}>
@@ -177,29 +192,21 @@ const Municipalities = () => {
             gap: "8px",
           }}
         >
-          <div
-            onClick={() => setOnSearch(true)}
-            style={{
-              width: "100%",
-              height: "32px",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#fff",
-              cursor: "text",
-            }}
-          >
-            <Typography
-              style={{
-                fontWeight: "initial",
-                marginLeft: "8px",
-                color: "#adb5bd",
-              }}
-            >
-              {currentQuery === "" ? "Search" : currentQuery}
-            </Typography>
-          </div>
+          <Input
+            onChange={(e) =>
+              setSearchParams(
+                (prev) => {
+                  prev.set("query", e.target.value);
+                  return prev;
+                },
+                { replace: true }
+              )
+            }
+            value={currentQuery as string}
+            size={"small"}
+            placeholder={"Search"}
+            variant={undefined}
+          />
           <Select
             onChange={handleChangeType}
             value={currentType}
@@ -208,7 +215,6 @@ const Municipalities = () => {
             options={menuList}
             size={undefined}
           />
-          {/* <Tabs style={{ overflowX: "auto", width: "100%" }} items={menuList} /> */}
           <Button
             style={{ backgroundColor: "#1982c4", color: "#fff" }}
             onClick={handleNavigate}
@@ -227,61 +233,34 @@ const Municipalities = () => {
           gap: "4px",
         }}
       >
-        {localeList && localeList.length < 1 ? (
+        {handleFilter().length < 1 ? (
           <div style={{ width: "100%", height: "100%", display: "grid" }}>
-            <Typography style={{ fontWeight: 600, fontSize: "1.2rem" }}>
-              Empty
+            <Typography style={{ fontWeight: 600, fontSize: "1.2rem", margin: "auto" }}>
+              No item found!
             </Typography>
           </div>
         ) : (
-          localeList
-            ?.sort((a, b) => {
-              if (a.municipalityName < b.municipalityName) {
-                return -1;
-              }
-              if (a.municipalityName > b.municipalityName) {
-                return 1;
-              }
-              return 0;
-            })
-            .filter(
-              (item) => currentType === "all" || item.type === currentType
-            )
-            .map((item) => (
-              <div
-              onClick={()=> handleViewLocale(item.zipCode)}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                <Typography style={{ fontWeight: 600 }}>
-                  {item.municipalityName}
-                </Typography>
-                <Typography style={{ fontSize: ".8rem" }}>
-                  {item.zipCode}
-                </Typography>
-              </div>
-            ))
-        )}
-        <div ref={itemInView} style={{ width: "100%" }}></div>
-        {isFetchingNextPage && (
-          <div
-            style={{
-              width: "100%",
-              padding: "16px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ margin: "auto" }}>
-              <Spinner size="large" />
+          handleFilter().map((item) => (
+            <div
+              key={item.zipCode}
+              onClick={() => handleViewLocale(item.zipCode)}
+              style={{
+                width: "100%",
+                height: "auto",
+                padding: "8px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              <Typography style={{ fontWeight: 600 }}>
+                {item.municipalityName}
+              </Typography>
+              <Typography style={{ fontSize: ".8rem" }}>
+                {item.zipCode}
+              </Typography>
             </div>
-          </div>
+          ))
         )}
       </div>
       <Modal
@@ -290,15 +269,16 @@ const Municipalities = () => {
         okHid={true}
         children={
           <SearchBox
-          setOnSearch={setOnSearch}
-          setSearchParams={setSearchParams}
+            setOnSearch={setOnSearch}
+            setSearchParams={setSearchParams}
             currentQuery={currentQuery}
-            handleSearchItem={handleSearchItem}
           />
         }
         openModal={onSearch}
         setCloseModal={handleCancelSearch}
       />
+
+
       {contextMessage}
     </Layout>
   );

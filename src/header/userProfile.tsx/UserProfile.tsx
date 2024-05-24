@@ -7,7 +7,8 @@ import Button from "../../components/Button";
 
 
 import { useUserData } from "../../provider/DataProvider";
-import { handleSaveLocal } from "../../utils/localStorage";
+
+import "./style.scss"
 
 const UserProfile = () => {
     const navigate = useNavigate()
@@ -17,7 +18,6 @@ const UserProfile = () => {
 
     const handleSignOut = async()=>{
         try {
-          await handleSaveLocal("selectedPath", "/dashboard");
             signOut()
             navigate("/auth/login")
         } catch (error) {
@@ -61,7 +61,7 @@ const UserProfile = () => {
           
         </div>
         <div style={{ textAlign: "center" }}>
-          <Typography.Title level={3}>
+          <Typography.Title className="user-text" onClick={()=> navigate(`/manage/user/${userData.userName}`)} level={3}>
             {userData.userFullName}
           </Typography.Title>
           <Typography.Text>{userData.userType === "headAdmin" ? "Provincial admin" : "Admin"}</Typography.Text>

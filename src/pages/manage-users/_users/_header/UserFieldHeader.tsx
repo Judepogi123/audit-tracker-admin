@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 
 import { Typography, message } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -11,40 +11,48 @@ import Input from "../../../../components/Input";
 import { useUserData } from "../../../../provider/DataProvider";
 import { PermissionsProps } from "../../../../interface/manage";
 
-const UserFieldHeader = () => {
-    const [messageApi, contextMessage] = message.useMessage()
-    const [permission, setPermission] = useState<PermissionsProps | null>(null)
+interface SearchProps {
+  setOnSearch: React.Dispatch<SetStateAction<boolean>>;
+  currentQuery: string | null;
+}
+
+const UserFieldHeader = ({ setOnSearch, currentQuery }: SearchProps) => {
+  const [messageApi, contextMessage] = message.useMessage();
+  const [permission, setPermission] = useState<PermissionsProps | null>(null);
   const navigate = useNavigate();
 
-  const user = useUserData()
+  const user = useUserData();
 
-  useEffect(()=>{
-    const handleUserPersmission = ()=>{
+  useEffect(() => {
+    const handleUserPersmission = () => {
       try {
-        const temp: PermissionsProps =  user.userPermission === "all" ? "all" :JSON.parse(user.userPermission);
-        setPermission(temp)
+        const temp: PermissionsProps =
+          user.userPermission === "all"
+            ? "all"
+            : JSON.parse(user.userPermission);
+        setPermission(temp);
       } catch (error) {
-        messageApi.error(`Something went wrong with user permission`)
+        messageApi.error(`Something went wrong with user permission`);
       }
-    }
-    handleUserPersmission()
+    };
+    handleUserPersmission();
 
-    return ()=>setPermission(null)
-  },[user])
+    return () => setPermission(null);
+  }, [user]);
 
-  const handleNavigatePath =()=>{
-    if (permission && typeof permission === 'object' && 'users' in permission) {
+  const handleNavigatePath = () => {
+    if (permission && typeof permission === "object" && "users" in permission) {
       if (permission.users === "usersR" || user.userPermission === "all") {
         messageApi.warning(`Current user is not authorized for this action!`);
         return;
       }
     }
     try {
-        navigate(`/manage/new-user/${genUid()}`)
+      navigate(`/manage/new-user/${genUid()}`);
     } catch (error) {
-       messageApi.error(`Sorry, could not navigate add new user page: ${error}`)
+      messageApi.error(`Sorry, could not navigate add new user page: ${error}`);
     }
-  }
+  };
   return (
     <Layout
       style={{
@@ -54,21 +62,44 @@ const UserFieldHeader = () => {
         justifyContent: "space-between",
         flexDirection: "row",
         alignItems: "center",
+        backgroundColor: "#fff",
       }}
     >
-        {contextMessage}
+      {contextMessage}
       <div style={{ width: "100%", padding: "5px" }}>
-        <Input
+        {/* <Input
           style={{ width: "100%" }}
           size={"small"}
           placeholder={"Search user"}
           variant={undefined}
-        />
+        /> */}
+
+        <div
+        onClick={()=> setOnSearch(true)}
+          style={{
+            width: "100%",
+            height: "35px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            cursor: "text",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Typography style={{ fontWeight: 400, color: "#ccc", marginLeft: "8px" }}>
+            Search
+          </Typography>
+        </div>
       </div>
       <div style={{ width: "auto", padding: "5px" }}>
         <Tooltip enterDelay={1} title="Add new user">
           <>
-            <Button style={{backgroundColor: "#1982c4", color: "#fff"}} onClick={handleNavigatePath}>Add User</Button>
+            <Button
+              style={{ backgroundColor: "#1982c4", color: "#fff" }}
+              onClick={handleNavigatePath}
+            >
+              Add User
+            </Button>
           </>
         </Tooltip>
       </div>

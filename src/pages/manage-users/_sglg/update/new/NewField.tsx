@@ -43,7 +43,9 @@ import {
   IndicatorsProps,
   DraftedArea,
 } from "../../../../../interface/manage";
-import { useDebounce } from "use-debounce";
+
+//controller
+import { useDebounce,useDebouncedCallback } from "use-debounce";
 
 const newField: FieldProps = {
   id: genID(),
@@ -79,6 +81,11 @@ const handleCreatIndicator = (
     stage: count++,
     status: false,
     marked: false,
+    path: "",
+    answer: "",
+    movFiles: "",
+    pushKey: "",
+    notice: ""
   };
 
   return newIndicator;
@@ -103,12 +110,10 @@ const NewField = () => {
   const [confimnSave, setConfirmnSave] = useState<boolean>(false);
   const [onRequire, setOnRequire] = useState<boolean>(false);
   const [result, setResult] = useState<string | undefined>();
-  const [drafted, setDrafted] = useState<boolean>(true);
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const { auditID, areaKey } = useParams();
-  const navigate = useNavigate();
   const useData = useUserData();
 
   const link = field?.type === "Editing" ? `/manage/audit-info/${auditID}/area/${field?.pushKey}` : `/manage/audit/${auditID}`;
@@ -352,7 +357,6 @@ const NewField = () => {
           <div>
             <Button
               onClick={handleSaveDraft}
-              style={{ backgroundColor: drafted ? "" : "#48cae4" }}
             >
               <BsSave />
             </Button>
@@ -558,6 +562,8 @@ const IndicatorField = ({
   };
 
   const handleAddSubIndicator = (id: string) => {
+  console.log("Clicked",id);
+  
     const newList = { ...field };
 
     const walk = (obj: IndicatorsProps) => {
@@ -694,36 +700,28 @@ const IndicatorField = ({
   const handleRemoveIndicatorValue = (id: string, itemID: string) => {
     if (!field) return;
 
-    // Clone the current field state
     const newField: FieldProps = { ...field };
 
     const searchEntity = (indicators: IndicatorsProps[]) => {
       for (const indicator of indicators) {
         if (indicator.id === itemID) {
-          // Check if the data input method value is an array
           if (Array.isArray(indicator.dataInputMethod.value)) {
-            // Find the index of the item with the specified ID
             const indexToRemove = indicator.dataInputMethod.value.findIndex(
               (item) => item.key === id
             );
             if (indexToRemove !== -1) {
-              // Remove the item from the array
               indicator.dataInputMethod.value.splice(indexToRemove, 1);
             }
           }
           break;
         }
-        // If the indicator has sub-indicators, recursively call this function
         if (indicator.subIndicator) {
           searchEntity(indicator.subIndicator);
         }
       }
     };
 
-    // Call the helper function to remove the value
     searchEntity(newField.indicators);
-
-    // Update the state with the modified field object
     setField(newField);
   };
 
@@ -958,6 +956,7 @@ const IndicatorField = ({
           {item.subIndicator &&
             item.subIndicator.map((item, idx) => (
               <IndicatorField
+              key={idx}
                 messageApi={messageApi}
                 setField={setField}
                 field={field}

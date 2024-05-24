@@ -9,7 +9,8 @@ import {
   query as fQuery,
   limit,
   getDocs,
-  startAfter as fStartAfter
+  startAfter as fStartAfter,
+  deleteDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import {
@@ -31,7 +32,7 @@ import {
   equalTo,
   startAt,endAt
 } from "firebase/database";
-import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
+import { getStorage, ref as storageRef, uploadBytes,getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDDQNhxuGUmz-tDA2EFcOq3F7uMDRU7VUM",
@@ -81,4 +82,6 @@ export {
   collection,
   fQuery,
   limit,
+  getDownloadURL,
+  deleteDoc
 };

@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 
+//controller
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../../server/api/axios";
 
+//ui
 import { Typography, Skeleton, message } from "antd";
 import Layout from "../../../components/Layout";
 import Modal from "../../../components/Modal";
 import Button from "../../../components/Button";
+import Spinner from "../../../components/Spinner";
+
+//icons
 import { EditOutlined } from "@ant-design/icons";
 
+//utils
 import { convertToArrays } from "../../../pages/manage-users/_sglg/update/_functions";
 
 interface RequirementsProps {
@@ -90,7 +96,6 @@ const AuditTrackerInfo = () => {
     return () => setCurrrentField(null);
   }, []);
 
-
   const handleUpdate = () => {
     setOnUpdate(false);
   };
@@ -125,7 +130,6 @@ const AuditTrackerInfo = () => {
 
   return (
     <Layout
-      onMouseEnter={() => setHoverID({ id: null })}
       style={{
         width: "100%",
         height: "100%",
@@ -135,10 +139,11 @@ const AuditTrackerInfo = () => {
         overflow: "auto",
       }}
     >
-
       {contextHolder}
       {isLoading ? (
-        <Skeleton />
+        <Layout style={{width:"100%", height: "100%", display: "grid"}}>
+          <div style={{margin: "auto"}}><Spinner size="large"/></div>
+        </Layout>
       ) : (
         <>
           <div
@@ -183,8 +188,6 @@ const AuditTrackerInfo = () => {
                   key={indicator.key}
                   style={{
                     cursor: "pointer",
-                    border:
-                      hoverID?.id === indicator.key ? "1px solid #ccc" : "",
                     borderRadius: "5px",
                   }}
                 >
@@ -194,11 +197,19 @@ const AuditTrackerInfo = () => {
                     >
                       <Typography.Paragraph
                         style={{
-                          color: hoverID?.id === indicator.key ? "#c1121f" : "",
+                          fontWeight: 600,
+                          fontSize: "1.1rem"
                         }}
                       >
                         {index + 1}. {indicator.query}
                       </Typography.Paragraph>
+                      <Typography
+                        style={{ fontStyle: "italic", fontWeight: 400 }}
+                      >
+                        {indicator.mov === "null"
+                          ? "This indicator does not support MOV"
+                          : ""}
+                      </Typography>
                     </div>
                     {indicator.dataInputMethod.type === "null" ? (
                       <Typography
@@ -214,19 +225,16 @@ const AuditTrackerInfo = () => {
                     )}
                   </div>
 
-                  <div>
+                  <div style={{width: "100%", height: "auto", display: "flex", flexDirection: "column", gap: "4px"}}>
                     {indicator.subIndicator &&
                       Object.values(indicator.subIndicator).map(
                         (item, subIndex) => (
                           <div
+                          key={subIndex}
                             style={{
                               width: "100%",
                               height: "auto",
                               padding: "0px 20px",
-                              border:
-                                hoverID?.id === item.key
-                                  ? "1px solid #ccc"
-                                  : "",
                               borderRadius: "5px",
                             }}
                           >
@@ -234,12 +242,24 @@ const AuditTrackerInfo = () => {
                               <div>
                                 <Typography
                                   style={{
-                                    color:
-                                      hoverID?.id === item.key ? "#c1121f" : "",
+                                    fontWeight: 600,
+                                    fontSize: "1.1rem"
                                   }}
                                 >
                                   {index + 1}.{subIndex + 1} {item.query}
                                 </Typography>
+                                {item.dataInputMethod.type === "null" && (
+                                  <Typography
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontWeight: 400,
+                                    }}
+                                  >
+                                    {indicator.mov === "null"
+                                      ? "This indicator does not support MOV"
+                                      : ""}
+                                  </Typography>
+                                )}
                                 {item.dataInputMethod.type === "null" ? (
                                   <Typography
                                     style={{
@@ -264,22 +284,20 @@ const AuditTrackerInfo = () => {
                                 height: "auto",
                                 display: "flex",
                                 flexDirection: "column",
+                                gap: "4px"
                               }}
                             >
                               {item.subIndicator &&
                                 Object.values(item.subIndicator).map(
                                   (sub, subSubIndex) => (
                                     <div
+                                    key={subSubIndex}
                                       style={{
                                         width: "100%",
                                         height: "auto",
                                         padding: "0px 20px",
                                         display: "flex",
                                         flexDirection: "column",
-                                        border:
-                                          hoverID?.id === sub.key
-                                            ? "1px solid #ccc"
-                                            : "",
                                         borderRadius: "5px",
                                       }}
                                     >
@@ -293,10 +311,8 @@ const AuditTrackerInfo = () => {
                                         >
                                           <Typography
                                             style={{
-                                              color:
-                                                hoverID?.id === sub.key
-                                                  ? "#c1121f"
-                                                  : "",
+                                              fontWeight: 600,
+                                              fontSize: "1.1rem"
                                             }}
                                           >
                                             {index + 1}.{subIndex + 1}.
@@ -345,8 +361,15 @@ const AuditTrackerInfo = () => {
             <div
               style={{ width: "100%", height: "auto", display: "grid" }}
             ></div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button onClick={() => setOnUpdate(true)}>Update</Button>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                justifyContent: "flex-end",
+                padding: "8px",
+              }}
+            >
+              <Button onClick={() => setOnUpdate(true)} style={{backgroundColor: "#1982c4",color: "#fff"}}>Update</Button>
             </div>
           </div>
         </>
@@ -381,7 +404,7 @@ const IndicatorValue = ({ value, type }: { value: string; type: string }) => {
         }}
       >
         {Object.values(temp).map((item, index) => (
-          <Typography key={index}>{item.title}</Typography>
+          <Typography key={index}>✅{item.title}</Typography>
         ))}
       </div>
     );
@@ -389,8 +412,8 @@ const IndicatorValue = ({ value, type }: { value: string; type: string }) => {
   if (type === "str" || type.includes("num") || type === "date") {
     return (
       <Typography>
-        {type === "str" ? `Take text as response` : type === "num"}
-      </Typography>
+        {type === "str" ? `Take text as response` : type === "num" ? `Take numbers as response` : `Take date as response`}
+      </Typography> 
     );
   }
 };

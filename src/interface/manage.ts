@@ -34,7 +34,9 @@ export interface AreaProps {
   locked: boolean;
   pushKey: string;
   archived: boolean;
-  dateArchived: string
+  dateArchived: string;
+  id: string;
+  type: string
 }
 
 export interface NewArea {
@@ -70,12 +72,17 @@ export interface IndicatorsProps {
   id: string;
   mov: string;
   movDueDate: string | undefined | "null";
+  path: string;
   title: string;
   type: "indicator" | "subIndicator";
-  subIndicator?: IndicatorsProps[];
+  subIndicator: IndicatorsProps[];
   stage: number;
   status: boolean;
+  answer: string;
+  movFiles: string;
+  pushKey: string;
   marked: boolean;
+  notice: string;
 }
 
 export interface FieldProps {

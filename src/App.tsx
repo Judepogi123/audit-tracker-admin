@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
 
 import Home from "./home/Home";
@@ -9,7 +9,6 @@ import AddAudit from "./routes/new/new-audit/AddAudit";
 import Profile from "./routes/info/profile/Profile";
 import DataProvider from "./provider/DataProvider";
 
-
 import Dashboard from "./pages/dashboard/Dashboard";
 import Manage from "./pages/manage-users/Manage";
 import Municipalities from "./pages/municipalities/Municipalities";
@@ -17,7 +16,6 @@ import About from "./pages/about/About";
 import UserManual from "./pages/user-manual/UserManual";
 import ComplianceList from "./pages/compliance/ComplianceList";
 import UpdateField from "./pages/manage-users/_sglg/update/update/UpdateField";
-
 
 //nested
 import AuditField from "./pages/manage-users/_sglg/update/AuditField";
@@ -31,7 +29,6 @@ import NewLocale from "./pages/municipalities/NewLocale";
 import ResetPassword from "./routes/admin/ResetPassword";
 import Locale from "./routes/info/locale/Locale";
 
-
 import { Layout } from "antd";
 import "./App.css";
 
@@ -40,7 +37,7 @@ function App() {
     <Layout style={{ width: "100%", height: "100vh" }}>
       <Routes>
         <Route path="/auth/login" element={<Login />} />
-        <Route path="/dilg-admin-reset-password" element={<ResetPassword/>}/>
+        <Route path="/dilg-admin-reset-password" element={<ResetPassword />} />
         <Route element={<AuthOutlet fallbackPath="/auth/login" />}>
           <Route path="/" element={<DataProvider children={<Home />} />}>
             <Route
@@ -49,16 +46,12 @@ function App() {
             />
 
             <Route path="new-audit" element={<AddAudit />} />
-            <Route path="profile" element={<Profile />} />
             <Route index path="dashboard" element={<Dashboard />} />
             <Route path="manage" element={<Manage />} />
 
             <Route path="/manage/update-audit" element={<AuditField />} />
             <Route path="/manage/update-field/:fieldID" element={<UpdateField />} />
-            <Route
-              path="/manage/update-audit/new-field"
-              element={<NewField />}
-            />
+            <Route path="/manage/update-audit/new-field" element={<NewField />} />
             <Route path="/manage/new-user/:newUserID" element={<NewUser />} />
             <Route path="/manage/new-audit/:newAuditID" element={<NewAudit />} />
             <Route path="/manage/audit/:auditID" element={<AuditInfo />} />
@@ -70,15 +63,16 @@ function App() {
             <Route path="municipalities/new-locale" element={<NewLocale />} />
             <Route path="municipalities/locale/:localeID" element={<Locale />} />
 
-            <Route path="compliance" element={<ComplianceList />}>
-
-            </Route>
+            <Route index path="/compliance" element={<ComplianceList />} />
             <Route
               path="/compliance/:zipCode/compliance/:complianceID"
               element={<ComplianceData />}
             />
             <Route path="about" element={<About />} />
             <Route path="user-manual" element={<UserManual />} />
+
+            {/* Redirect to compliance on initial load */}
+            <Route path="*" element={<Navigate to="/compliance" replace />} />
           </Route>
         </Route>
       </Routes>

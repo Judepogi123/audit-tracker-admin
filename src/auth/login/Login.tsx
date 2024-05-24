@@ -30,20 +30,42 @@ function Login() {
 
   console.log(isError);
 
+  console.log(import.meta.env.VITE_JWT_SECRET);
+  
+
   async function onFinish(values: FormFields) {
     setIsLoading(true);
     try {
+      console.log('Sending login request with values:', values);
       const response = await axios.post("auth/login", values);
-
+  
+      console.log('Login response:', response);
+  
       if (response.data.status === false) {
         messageApi.error(response.data.message);
         setIsError(response.data);
         setIsLoading(false);
         return;
       }
-
+  
       const token = response.data.token;
-
+  
+      if (!token) {
+        messageApi.error('No token received');
+        console.log('No token received in response:',response.status ,response.data);
+        setIsLoading(false);
+        return;
+      }
+  
+      try {
+        const parsedToken = JSON.parse(atob(token.split('.')[1])); // Basic validation to check token format
+        console.log("Parsed Token:", parsedToken);
+      } catch (e) {
+        messageApi.error('Invalid token format');
+        setIsLoading(false);
+        return;
+      }
+  
       if (
         signIn({
           auth: {
@@ -62,12 +84,13 @@ function Login() {
         navigate("/auth/login");
       }
     } catch (error) {
-      console.log(error);
+      console.log('Error during login request:', error);
       messageApi.error(`Sorry something went wrong: ${error}`);
     } finally {
       setIsLoading(false);
     }
   }
+  
 
   return (
     <Layout
@@ -89,7 +112,7 @@ function Login() {
           <div className="login-header">
             <div className="title">
               <Typography.Title level={2} color="red">
-                Loginn
+                Login
               </Typography.Title>
             </div>
 

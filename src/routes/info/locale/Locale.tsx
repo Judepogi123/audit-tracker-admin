@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Layout from "../../../components/Layout";
 import Button from "../../../components/Button";
 import { Typography, message } from "antd";
-import Tabs from "../../../components/Tabs";
 import Spinner from "../../../components/Spinner";
 import Modal from "../../../components/Modal";
 
@@ -18,28 +17,17 @@ import { MdDeleteOutline } from "react-icons/md";
 
 //interface
 import { LocaleListProps } from "../../../interface/compliance";
+import Loading from "../../../components/Loading";
 
-interface Tab {
-  key: string;
-  label: string | React.ReactNode;
-  children?: React.ReactNode;
-}
-
-interface TabsProps {}
-
-const items: Tab[] = [
-  { label: "Compliance", key: "compliance" },
-  { label: "Users", key: "users" },
-];
 
 const Locale = () => {
   const [localeData, setLocaleData] = useState<LocaleListProps | undefined>();
-  const [deleting, setDeleting] = useState<boolean>(false);
+  const [loading, setOnLoading] = useState<boolean>(false);
   const [onDeleted, setOnDelete] = useState<boolean>(false);
   const [messageApi, contextMessage] = message.useMessage();
   const { localeID } = useParams();
 
-  const { data, isLoading,isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["localeData"],
     queryFn: () => axios.get(`/data/locale-data`, { params: { localeID } }),
   });
@@ -54,11 +42,13 @@ const Locale = () => {
   }, [data]);
 
   const handleRemoveLocale = async () => {
+    setOnLoading(true)
     try {
       const response = await axios.delete(`/data/remove-locale`, {
         params: { localeID },
       });
       if (response.status === 200) {
+        setOnLoading(false)
         messageApi.success(`Success!`);
         history.back();
         setLocaleData(undefined);
@@ -67,6 +57,8 @@ const Locale = () => {
       messageApi.error(`${response.data.message}`);
     } catch (error) {
       messageApi.error(`Sorry something went wrong: ${error}`);
+    }finally{
+      setOnLoading(false)
     }
   };
 
@@ -75,17 +67,6 @@ const Locale = () => {
       <div style={{ width: "100%", height: "100%", display: "grid" }}>
         <div style={{ margin: "auto" }}>
           <Spinner size="large" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!data?.data || isError) {
-    return (
-      <div style={{ width: "100%", height: "100%", display: "grid" }}>
-        <div style={{ margin: "auto", textAlign: "center" }}>
-          <Typography style={{fontWeight: 600, fontSize: "1.2rem"}}>Item not found | Someting went wrong</Typography>
-          <Typography>Try to refresh the page!</Typography>
         </div>
       </div>
     );
@@ -122,14 +103,14 @@ const Locale = () => {
             <Typography style={{ fontWeight: 600, width: "130px" }}>
               Locale Zip code:
             </Typography>
-            <Typography>4900</Typography>
+            <Typography>{localeData?.zipCode || "Unknown"}</Typography>
           </div>
 
           <div style={{ display: "flex" }}>
             <Typography style={{ fontWeight: 600, width: "130px" }}>
               Locale Type:
             </Typography>
-            <Typography>4900</Typography>
+            <Typography>{localeData?.type ==="provincial"? "Provinvial" : localeData?.type === "municipal" ? "Municipal" : "Barangay"}</Typography>
           </div>
         </div>
 
@@ -156,9 +137,6 @@ const Locale = () => {
           </Button>
         </div>
 
-        <div style={{ width: "100%", display: "flex" }}>
-          <Tabs items={items} />
-        </div>
       </div>
       <Modal
       onFunction={handleRemoveLocale}
@@ -168,6 +146,22 @@ const Locale = () => {
         }
         openModal={onDeleted}
         setCloseModal={()=> setOnDelete(false)}
+      />
+
+<Modal
+        width={400}
+        okHid={true}
+        cancelHid={true}
+        children={
+          <Loading type={"classic"}/>
+        }
+        openModal={loading}
+        setCloseModal={()=>{
+          if(loading){
+            return
+          }
+          setOnLoading(false)
+        }}
       />
     </Layout>
   );

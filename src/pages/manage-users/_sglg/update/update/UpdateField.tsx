@@ -1,6 +1,5 @@
 import React, { useState, useId, useEffect } from "react";
 import { v4 as genID } from "uuid";
-import { useDebounce } from "use-debounce";
 import axios from "../../../../../../server/api/axios";
 import { useUserData } from "../../../../../provider/DataProvider";
 
@@ -23,13 +22,10 @@ import Rsults from "../../../../../components/Rsults";
 import Spinner from "../../../../../components/Spinner";
 
 import "./style.scss";
-import { dataInputMethod, mov } from "./dataSourse";
 
 //utils
-import FileTypeRenderer from "../../../../../utils/FileTypeRenderer";
 import { handleManString } from "../../../../../utils/_global-functions";
 import {
-  handleGetLocal,
   handleSaveLocal,
 } from "../../../../../utils/localStorage";
 import { handleGenerateDate } from "../../../../../provider/CurrentDateProvider";
@@ -39,7 +35,6 @@ import { VscOpenPreview } from "react-icons/vsc";
 import {
   PlusOutlined,
   DeleteOutlined,
-  MinusSquareOutlined,
 } from "@ant-design/icons";
 import { BsSave } from "react-icons/bs";
 import { MessageInstance } from "antd/es/message/interface";
@@ -48,10 +43,9 @@ import { MessageInstance } from "antd/es/message/interface";
 import {
   FieldProps,
   IndicatorsProps,
-  ValueProps,
-  RequirementsProps,
   DraftedArea,
 } from "../../../../../interface/manage";
+import { dataInputMethod } from "./dataSourse";
 
 const newField: FieldProps = {
   id: genID(),
@@ -87,6 +81,11 @@ const handleCreatIndicator = (
     stage: count,
     status: false,
     marked: false,
+    path: "",
+    answer: "",
+    movFiles: "",
+    pushKey: "",
+    notice: ""
   };
 
   return newIndicator;

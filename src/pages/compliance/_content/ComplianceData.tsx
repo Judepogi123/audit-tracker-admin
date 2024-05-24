@@ -98,8 +98,6 @@ const ComplianceData = () => {
   const [onArchive, setArchive] = useState<boolean>(false);
   const [onMore, setonMore] = useState<boolean>(false);
 
- const navigate = useNavigate()
-
   const handleFetchComplianceData = async () => {
     setIsGetting(true);
     try {
@@ -492,7 +490,7 @@ const ComplianceData = () => {
                   setDataList={setData}
                   dataList={data}
                   data={item}
-                  
+                  fieldPushkey={data?.fieldPushKey as string}
                 />
               ))}
           </div>

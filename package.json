@@ -1,5 +1,5 @@
 {
-  "homepage": "https://audit-tracker-admin.web.app/",
+  "homepage": "https://audit-tracker-admin.firebaseapp.com/",
   "name": "project-002",
   "private": true,
   "version": "0.0.0",
@@ -32,6 +32,7 @@
     "localforage": "^1.10.0",
     "lottie-react": "^2.4.0",
     "match-sorter": "^6.3.4",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.0.3",
     "parse-json": "^8.1.0",
     "react": "^18.2.0",

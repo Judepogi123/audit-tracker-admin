@@ -1,7 +1,6 @@
 import axios from "../../server/api/axios";
 
 export const handleFetchUser = async (pageParam: string) => {
-    console.log(pageParam);
     
     const response = await axios.get("/data/users", {
       params: {

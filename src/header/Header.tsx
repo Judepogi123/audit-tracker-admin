@@ -49,7 +49,6 @@ const Header = () => {
       </div>
       <div className="right-header">
 
-
         <div className="profile-container">
           <Popover
             open={open}

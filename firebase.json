@@ -1,7 +1,7 @@
 {
   "hosting": {
-"site": "audit-tracker-admin.firebaseapp",   
-"public": "dist",
+    "site": "audit-tracker-admin",   
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
