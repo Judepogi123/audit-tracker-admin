@@ -1,8 +1,8 @@
 import axios from "axios"
 const dev = "http://localhost:3000"
-const production = "https://audit-tracker-admin.firebaseapp.com/"
+const production = "https://audit-tracker-admin.onrender.com"
 export default axios.create({
-    baseURL: dev,
+    baseURL: production,
     headers: {
         "Content-Type": "application/json",
       },
