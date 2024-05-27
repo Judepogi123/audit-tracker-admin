@@ -22,6 +22,7 @@ function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextMessage] = message.useMessage();
+  const [error, setError] = useState<string | null>(null)
   const [isError, setIsError] = useState<{
     message: string;
     target: string;
