@@ -19,13 +19,14 @@ const SystemDataContext = createContext<SystemDataProps | null>(null);
 
 export const SystemDataProvider = ({ children }: ContextProps) => {
   const [systemData, setSystemData] = useState<SystemDataProps | null>(null);
+  
 
   const location = useLocation()
   const currentPath = location.pathname;
 
   const handleFetchSystemData = async()=>{
     try {
-        const response = await axios.get("/data/system")
+        const response = await axios.get("data/system")
         if(response.data){            
             setSystemData({systemDatas: response.data, currentPath})
         }

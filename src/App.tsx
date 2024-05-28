@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
 
@@ -16,6 +15,7 @@ import About from "./pages/about/About";
 import UserManual from "./pages/user-manual/UserManual";
 import ComplianceList from "./pages/compliance/ComplianceList";
 import UpdateField from "./pages/manage-users/_sglg/update/update/UpdateField";
+import LandingPage from "./home/LandingPage";
 
 //nested
 import AuditField from "./pages/manage-users/_sglg/update/AuditField";
@@ -40,6 +40,7 @@ function App() {
         <Route path="/dilg-admin-reset-password" element={<ResetPassword />} />
         <Route element={<AuthOutlet fallbackPath="/auth/login" />}>
           <Route path="/" element={<DataProvider children={<Home />} />}>
+          <Route index path="/" element={<LandingPage/>}/>
             <Route
               path="/manage/audit-info/:auditID/area/:fieldID"
               element={<AuditTrackerInfo />}
@@ -63,7 +64,7 @@ function App() {
             <Route path="municipalities/new-locale" element={<NewLocale />} />
             <Route path="municipalities/locale/:localeID" element={<Locale />} />
 
-            <Route index path="/compliance" element={<ComplianceList />} />
+            <Route path="/compliance" element={<ComplianceList />} />
             <Route
               path="/compliance/:zipCode/compliance/:complianceID"
               element={<ComplianceData />}

@@ -6,6 +6,7 @@ import { FaBook } from "react-icons/fa";
 import { FaInfoCircle } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FaMountainCity } from "react-icons/fa6";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSystemData } from "../provider/SystemDataProvider";
 import axios from "../../server/api/axios";
@@ -47,9 +48,8 @@ const mainSideBarMenu: SideBarProps[] = [
   { title: "About", icon: <FaInfoCircle color="#343a40" />, path: "/about" },
 ];
 
-const SideBar = () => {
+const SideBar = ({hanldeChangePage,currentPage}:{hanldeChangePage: (value: string) => void, currentPage: string | null}) => {
   const [selectedPath, setSelectedPath] = useState<string>(() => {
-    // Initialize selectedPath from sessionStorage, or default to "/dashboard"
     return sessionStorage.getItem("selectedPath") || "/dashboard";
   });
   const navigate = useNavigate();
@@ -76,11 +76,11 @@ const SideBar = () => {
         {mainSideBarMenu.map((item) => (
           <div
             style={{
-              backgroundColor: selectedPath === item.path ? "#ade8f4" : "",
+              backgroundColor: currentPage === item.path ? "#ade8f4" : "",
               borderRadius: "30px",
             }}
             key={item.title}
-            onClick={() => handleNavigatePath(item.path)}
+            onClick={() => hanldeChangePage(item.path)}
           >
             <div style={{ display: "flex", gap: "10px" }} className="side-bar-item">
               <>{item.icon}</>

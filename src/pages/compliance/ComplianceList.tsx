@@ -34,7 +34,6 @@ import { handleSaveLocal, handleGetLocal } from "../../utils/localStorage";
 
 //icons
 import { TbZoomReset } from "react-icons/tb";
-import loading from "../../assets/animations/loading-001.json";
 
 const statusList: { value: string; label: string }[] = [
   { value: "all", label: "All" },

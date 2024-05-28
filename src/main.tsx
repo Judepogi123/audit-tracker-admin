@@ -11,9 +11,6 @@ import App from "./App.tsx";
 import "./index.css";
 
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
@@ -33,9 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <AuthProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <SystemDataProvider>
             <App />
-          </SystemDataProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </AuthProvider>

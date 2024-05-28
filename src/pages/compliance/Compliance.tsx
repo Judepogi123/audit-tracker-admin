@@ -10,7 +10,6 @@ import Spinner from "../../components/Spinner";
 import { handleGetValueLabel } from "../../utils/_global-functions";
 
 import { Badge, Typography, message } from "antd";
-import { useComplianceData } from "../../provider/ComlianceDataProvider";
 import Header from "./_header/Header";
 import { OptionProps } from "antd/es/select";
 

@@ -231,6 +231,7 @@ const Municipalities = () => {
           flexDirection: "column",
           overflow: "auto",
           gap: "4px",
+          padding: "4px 8px"
         }}
       >
         {handleFilter().length < 1 ? (
