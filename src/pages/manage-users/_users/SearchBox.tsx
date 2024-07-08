@@ -58,7 +58,7 @@ const SearchBox = ({
         setIsSearching(false);
       }
     } catch (error) {
-      console.error("Error fetching search results:", error);
+      messageApi.error(`Error fetching search results: ${error}`);
     } finally {
       setIsSearching(false);
     }

@@ -6,13 +6,14 @@
   padding: 10px;
   width: 100%;
   height: 8%;
-  border: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 :root .new-field-content {
   width: 100%;
   height: 84%;
   display: flex;
-  border: 1px solid black;
   flex-direction: column;
   overflow: auto;
 }
@@ -25,7 +26,6 @@
 :root .new-field-content .indicator .indicator-header {
   width: 100%;
   height: 15%;
-  border: 1px solid #ccc;
   display: flex;
   align-items: center;
   padding: 0px 10px;
@@ -42,11 +42,17 @@
 :root .new-field-content .indicator .indicator-content .indicator-content-item {
   width: 100%;
   height: auto;
-  border: 1px solid #ccc;
-  padding: 5px;
-  background-color: #ffffff;
   border-radius: 5px;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+:root .new-field-content .indicator .indicator-content .indicator-content-item .indicator-content-header {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 :root .field-item {
   width: 100%;

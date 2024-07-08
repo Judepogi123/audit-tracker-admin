@@ -9,7 +9,7 @@ export const hanldeSearchItem = (id: string, temp: AreaProps[]| undefined) => {
   if(matchedId !== -1){
     return tempCopy[matchedId].title
   }else{
-    return "Field unknown"
+    return "Unknown Area"
   }
 };
 
@@ -21,7 +21,7 @@ export const handleSearchName = (code: string, temp: LocaleListProps[] | undefin
   if(matchedCode !== -1){
     return tempCopy[matchedCode].municipalityName
   }else{
-    return "Unknown"
+    return "Unknown Locale"
   }
 
 };

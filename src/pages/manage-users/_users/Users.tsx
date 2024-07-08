@@ -18,8 +18,6 @@ import { UserProps } from "../../../interface/manage";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import {
-  NavigateOptions,
-  URLSearchParamsInit,
   useNavigate,
 } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";

@@ -1,16 +1,20 @@
 import { useState } from "react";
+
+//styles
+import "./style.css";
 import Button from "../../components/Button";
 import InputPassword from "../../components/InputPassword";
 import Input from "../../components/Input";
 import { message } from "antd";
-
-import { Outlet, useNavigate } from "react-router-dom";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { Layout, Typography, Form } from "antd";
 
-import "./style.css";
+//controlllers
+import { Outlet, useNavigate } from "react-router-dom";
 import axios from "../../../server/api/axios";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
+
+//icons
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 interface FormFields {
   username: string;
@@ -29,19 +33,11 @@ function Login() {
     status: boolean;
   }>();
 
-  console.log(isError);
-
-  console.log(import.meta.env.VITE_JWT_SECRET);
-  
-
   async function onFinish(values: FormFields) {
     setIsLoading(true);
     try {
-      console.log('Sending login request with values:', values);
       const response = await axios.post("auth/login", values);
-  
-      console.log('Login response:', response);
-  
+    
       if (response.data.status === false) {
         messageApi.error(response.data.message);
         setIsError(response.data);
@@ -54,15 +50,6 @@ function Login() {
       if (!token) {
         messageApi.error('No token received');
         console.log('No token received in response:',response.status ,response.data);
-        setIsLoading(false);
-        return;
-      }
-  
-      try {
-        const parsedToken = JSON.parse(atob(token.split('.')[1])); // Basic validation to check token format
-        console.log("Parsed Token:", parsedToken);
-      } catch (e) {
-        messageApi.error('Invalid token format');
         setIsLoading(false);
         return;
       }
@@ -85,7 +72,6 @@ function Login() {
         navigate("/auth/login");
       }
     } catch (error) {
-      console.log('Error during login request:', error);
       messageApi.error(`Sorry something went wrong: ${error}`);
     } finally {
       setIsLoading(false);
@@ -141,9 +127,6 @@ function Login() {
                 size="defaultSize"
                 placeholder="Password"
               />
-            </Form.Item>
-            <Form.Item>
-              <Button type="link" children="Forgot password"></Button>
             </Form.Item>
           </div>
 

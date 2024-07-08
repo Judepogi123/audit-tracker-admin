@@ -1,0 +1,85 @@
+:root {
+  padding: 0;
+  margin: 0;
+
+  .main-container {
+    background-color: #fff;
+    overflow-y: auto;
+    .title-container {
+      width: 100%;
+      padding: 16px;
+    }
+
+    .main-text {
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+    .content {
+      width: 100%;
+      height: 100%;
+      padding: 16px 16px 16px 32px;
+
+      .message-content {
+        text-align: justify;
+        padding: 8px;
+        font-size: 1.1rem;
+      }
+      .ref-section {
+        display: flex;
+        padding: 16px;
+        font-style: italic;
+      }
+      .proponents-profile {
+        width: 100%;
+        height: auto;
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-template-columns: auto auto auto auto auto;
+        gap: 8px;
+
+        .developers{
+          width: 100%;
+          box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+          border-radius: 4px;
+          cursor: pointer;
+          border: 1px solid #ccc;
+
+          .profile-pic{
+            width: 100%;
+            height: 60%;
+            display: flex;
+            justify-content: center;
+            padding: 8px;
+          }
+          .profile-info{
+            width: 100%;
+            height: 40%;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            .info-item{
+              display: flex;
+              gap: 8px;
+            }
+
+            .info-pos{
+              width: 100%;
+              text-align: center;
+              padding: 8px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              background-color: #0077b6;
+            }
+          }
+        }
+      }
+      
+      .intern-details{
+        padding: 16px;
+        font-size: 1.1rem;
+      }
+    }
+  }
+}

@@ -1,8 +1,11 @@
-import React from "react";
+import { useState } from "react";
 import "./style.scss";
 
 //ui
 import Layout from "../components/Layout";
+import FloatingButton from "../components/FloatingButton";
+import Modal from "../components/Modal";
+import Button from "../components/Button";
 import { Typography, Row, Col } from "antd";
 
 //icons
@@ -50,6 +53,7 @@ const menuList: SideBarProps[] = [
 ];
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [onOpen, setOnOpen] = useState<boolean>(false);
 
   const hanldeChangePage = (value: string) => {
     try {
@@ -57,6 +61,10 @@ const LandingPage = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleOpenModal = () => {
+    setOnOpen(true);
   };
   return (
     <Layout
@@ -84,9 +92,11 @@ const LandingPage = () => {
                 backgroundColor: "#fffcf2",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center",gap: "16px",}}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "16px" }}
+              >
                 <>{item.icon}</>
-                <Typography style={{ fontWeight: 600, fontSize: "1.4rem" }}>
+                <Typography style={{ fontWeight: 600, fontSize: "1.2rem" }}>
                   {item.title}
                 </Typography>
               </div>
@@ -94,6 +104,22 @@ const LandingPage = () => {
           </Col>
         ))}
       </Row>
+      <FloatingButton onClick={() => setOnOpen(true)}>
+        <BsLayerForward fontSize={fontSize} color={iconColor} />
+      </FloatingButton>
+      <Modal
+      width={400}
+      title="User's manual"
+        okHid={true}
+        cancelHid={true}
+        children={
+          <div style={{width:"100%"}}>
+            <Button style={{width: "100%",backgroundColor: "#1982c4", color: "#fff", borderRadius: "16px"}}>Download</Button>
+          </div>
+        }
+        openModal={onOpen}
+        setCloseModal={() => setOnOpen(false)}
+      />
     </Layout>
   );
 };

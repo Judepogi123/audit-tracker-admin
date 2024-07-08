@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { v4 as genID } from "uuid";
 import axios from "../../../../../../server/api/axios";
 import { useUserData } from "../../../../../provider/DataProvider";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 //popup
@@ -45,7 +45,7 @@ import {
 } from "../../../../../interface/manage";
 
 //controller
-import { useDebounce,useDebouncedCallback } from "use-debounce";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
 
 const newField: FieldProps = {
   id: genID(),
@@ -85,7 +85,7 @@ const handleCreatIndicator = (
     answer: "",
     movFiles: "",
     pushKey: "",
-    notice: ""
+    notice: "",
   };
 
   return newIndicator;
@@ -96,7 +96,7 @@ const handleButtonColorProvider = (stage: number) => {
     case 0:
       return "#4a4fff";
     case 1:
-      return "#7d80ff";
+      return "#0077b6";
     case 2:
       return "#b0b2ff";
     default:
@@ -116,8 +116,11 @@ const NewField = () => {
   const { auditID, areaKey } = useParams();
   const useData = useUserData();
 
-  const link = field?.type === "Editing" ? `/manage/audit-info/${auditID}/area/${field?.pushKey}` : `/manage/audit/${auditID}`;
-  
+  const link =
+    field?.type === "Editing"
+      ? `/manage/audit-info/${auditID}/area/${field?.pushKey}`
+      : `/manage/audit/${auditID}`;
+
   const {
     data: draftedArea,
     refetch,
@@ -173,7 +176,7 @@ const NewField = () => {
           description: lastSaved?.desc || "",
           indicators: draftedField.indicators || [],
           type: lastSaved.type,
-          pushKey: draftedField.pushKey
+          pushKey: draftedField.pushKey,
         };
       });
     } catch (error) {
@@ -304,7 +307,10 @@ const NewField = () => {
     const date = await handleGenerateDate();
     const lastSaved: DraftedArea = draftedArea?.data;
     const localeType = await handleAuditType(auditID as string);
-    const link = field?.type === "Editing" ? `/manage/audit-info/${auditID}/area/${areaKey}` : `/manage/audit/${auditID}`;
+    const link =
+      field?.type === "Editing"
+        ? `/manage/audit-info/${auditID}/area/${areaKey}`
+        : `/manage/audit/${auditID}`;
     try {
       const response = await axios.post("/data/new-field", {
         ...field,
@@ -355,15 +361,8 @@ const NewField = () => {
         </Typography.Title>
         <div style={{ display: "flex", gap: "8px" }}>
           <div>
-            <Button
-              onClick={handleSaveDraft}
-            >
+            <Button onClick={handleSaveDraft}>
               <BsSave />
-            </Button>
-          </div>
-          <div style={{ cursor: "pointer" }}>
-            <Button>
-              <VscOpenPreview />
             </Button>
           </div>
         </div>
@@ -469,7 +468,7 @@ const NewField = () => {
         setCloseModal={() => setConfirmnSave(false)}
       />
       <Modal
-      okHid={true}
+        okHid={true}
         style={{ maxHeight: "600px" }}
         width={800}
         children={
@@ -480,9 +479,9 @@ const NewField = () => {
       />
 
       <Modal
-      width={650}
-      okHid={true}
-      cancelHid={true}
+        width={650}
+        okHid={true}
+        cancelHid={true}
         children={<Result link={link} setResult={setResult} />}
         openModal={result === "success"}
         setCloseModal={() => setResult(undefined)}
@@ -512,6 +511,21 @@ const IndicatorField = ({
   const [text, setText] = useState<string>("");
   const [debouncedText] = useDebounce(text, 1000);
 
+  console.log(field);
+
+  const debouncedQuery = useDebouncedCallback((id, type, value) => {
+    handleEditQuery(id, type, value);
+  }, 1000);
+
+  const handleChange = (
+    id: string,
+    type: string,
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    debouncedQuery(id, type, value);
+  };
+
   const handleGetMethodTypeString = (value: string | null) => {
     if (!value) return;
     try {
@@ -526,7 +540,9 @@ const IndicatorField = ({
       } else if (value.includes("date")) {
         return "date";
       }
-    } catch (error) {}
+    } catch (error) {
+      messageApi.error(`Sorry somethin with wrong: ${error}`);
+    }
   };
 
   const handleChangeMethodType = (
@@ -562,8 +578,6 @@ const IndicatorField = ({
   };
 
   const handleAddSubIndicator = (id: string) => {
-  console.log("Clicked",id);
-  
     const newList = { ...field };
 
     const walk = (obj: IndicatorsProps) => {
@@ -644,7 +658,6 @@ const IndicatorField = ({
     editValueTitle(newField.indicators);
     setField(newField);
   };
-  
 
   const handleEditQuery = (
     id: string,
@@ -658,7 +671,7 @@ const IndicatorField = ({
     const editIndicatorQuery = (indicators: IndicatorsProps[]): void => {
       for (const indicator of indicators) {
         if (indicator.id === id && indicator.type === type) {
-          indicator.query = e.target.value
+          indicator.query = e.target.value;
           return;
         }
         if (indicator.subIndicator) {
@@ -668,7 +681,7 @@ const IndicatorField = ({
     };
 
     editIndicatorQuery(newField.indicators);
-    
+
     setField(newField);
   };
 
@@ -797,7 +810,7 @@ const IndicatorField = ({
   return (
     <div key={item.id} className="indicator-content-item">
       <div
-        style={{ backgroundColor: handleStageProvider(item.stage) }}
+        style={{ backgroundColor: "#fff" }}
         className="indicator-content-header"
       >
         <div
@@ -839,7 +852,7 @@ const IndicatorField = ({
               </Tooltip>
             </div>
 
-            <div>
+            {/* <div>
               <Tooltip enterDelay={2} title="Add sub-indicator">
                 <div>
                   <Button
@@ -850,12 +863,23 @@ const IndicatorField = ({
                       backgroundColor: handleButtonColorProvider(item.stage),
                       color: "#fff",
                     }}
-                    icon={<PlusOutlined />}
-                    children={undefined}
-                  ></Button>
+                  >
+                    <div style={{ width: "20px" }}>
+                      <Typography.Text
+                        style={{
+                          fontWeight: 500,
+                          fontSize: ".8rem",
+                          color: "#fff",
+                        }}
+                      >
+                        {handleCountProvider(item.stage, index)}
+                      </Typography.Text>
+                      +
+                    </div>
+                  </Button>
                 </div>
               </Tooltip>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -904,7 +928,7 @@ const IndicatorField = ({
             Means of Verification:
           </Typography.Text>
           <Select
-          value={item.mov}
+            value={item.mov}
             size="small"
             defaultValue="null"
             onChange={(value: string) => handleChangeMov(item.id, value)}
@@ -956,7 +980,7 @@ const IndicatorField = ({
           {item.subIndicator &&
             item.subIndicator.map((item, idx) => (
               <IndicatorField
-              key={idx}
+                key={idx}
                 messageApi={messageApi}
                 setField={setField}
                 field={field}
@@ -966,6 +990,34 @@ const IndicatorField = ({
               />
             ))}
         </div>
+      </div>
+      <div>
+        <Tooltip enterDelay={2} title="Add sub-indicator">
+          <div>
+            <Button
+              onClick={() => handleAddSubIndicator(item.id)}
+              style={{
+                width: "100%",
+                display: item.stage === 2 ? "none" : "block",
+                backgroundColor: handleButtonColorProvider(item.stage),
+                color: "#fff",
+              }}
+            >
+              <div style={{ width: "20px" }}>
+                <Typography.Text
+                  style={{
+                    fontWeight: 500,
+                    fontSize: ".8rem",
+                    color: "#fff",
+                  }}
+                >
+                  {handleCountProvider(item.stage, index)}
+                </Typography.Text>
+                +
+              </div>
+            </Button>
+          </div>
+        </Tooltip>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../../server/api/axios";
 
 //ui
-import { Typography, Skeleton, message } from "antd";
+import { Typography, message } from "antd";
 import Layout from "../../../components/Layout";
 import Modal from "../../../components/Modal";
 import Button from "../../../components/Button";
@@ -13,6 +13,7 @@ import Spinner from "../../../components/Spinner";
 
 //icons
 import { EditOutlined } from "@ant-design/icons";
+import { GoDotFill } from "react-icons/go";
 
 //utils
 import { convertToArrays } from "../../../pages/manage-users/_sglg/update/_functions";
@@ -62,7 +63,6 @@ interface HoverIDProps {
 
 const AuditTrackerInfo = () => {
   const [currentField, setCurrrentField] = useState<FieldProps | null>(null);
-  const [hoverID, setHoverID] = useState<HoverIDProps | undefined>(undefined);
   const [onUpdate, setOnUpdate] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -151,15 +151,12 @@ const AuditTrackerInfo = () => {
               width: "100%",
               height: "auto",
               display: "flex",
-              padding: "5px",
+              padding: "8px",
               alignItems: "center",
               gap: "5px",
             }}
           >
             <Typography.Title level={4}>{currentField?.title}</Typography.Title>
-            <div style={{ padding: "5px" }}>
-              <EditOutlined style={{ fontSize: "1.2rem", cursor: "pointer" }} />
-            </div>
           </div>
           <div
             style={{
@@ -404,7 +401,7 @@ const IndicatorValue = ({ value, type }: { value: string; type: string }) => {
         }}
       >
         {Object.values(temp).map((item, index) => (
-          <Typography key={index}>✅{item.title}</Typography>
+          <Typography key={index} style={{display: "flex", gap: "8px", alignItems: "center"}}><GoDotFill/>{item.title}</Typography>
         ))}
       </div>
     );
@@ -412,7 +409,7 @@ const IndicatorValue = ({ value, type }: { value: string; type: string }) => {
   if (type === "str" || type.includes("num") || type === "date") {
     return (
       <Typography>
-        {type === "str" ? `Take text as response` : type === "num" ? `Take numbers as response` : `Take date as response`}
+        {type === "str" ? `Take text as response` : type.includes("num")? `Take numbers as response` : `Take date as response`}
       </Typography> 
     );
   }

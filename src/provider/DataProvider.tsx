@@ -41,7 +41,6 @@ export const DataProvider = ({ children }: ProviderProps) => {
       const response = await axios.get(`/auth/user-data?username=${username}`);
 
       if (response.status === 200 && response.data) {
-        console.log(response.data);
         setUserData(response.data);
       } else {
         console.error("Error fetching user data:", response.statusText);

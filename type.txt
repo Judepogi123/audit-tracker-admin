@@ -1,6 +1,6 @@
 {
   "hosting": {
-"site": "audit-tracker-admin.firebaseapp",   
+    "site": "audit-tracker-admin",
 "public": "dist",
     "ignore": [
       "firebase.json",
@@ -12,6 +12,7 @@
         "source": "**",
         "destination": "/index.html"
       }
-    ]
+    ],
+    "predeploy": "npm run build"
   }
 }

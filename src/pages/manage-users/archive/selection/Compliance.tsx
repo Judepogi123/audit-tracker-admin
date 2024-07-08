@@ -12,7 +12,10 @@ import Spinner from "../../../../components/Spinner";
 import { handleCheckString } from "../../../../utils/_list";
 
 //interface
-import { ComplianceDataProps } from "../../../../interface/compliance";
+import { ComplianceDataProps,AreaProps,LocaleListProps } from "../../../../interface/compliance";
+
+//utils
+import { handleSearchName,hanldeSearchItem } from "../../../compliance/_external-function/_handleGetFieldName";
 
 interface ComplianceListProps {
   handleRefetch: () => void;
@@ -30,15 +33,35 @@ const Compliance = ({
   const [complianceList, setComplianceList] = useState<
     ComplianceDataProps[] | []
   >();
+  const [areaList, setAreaList] = useState<AreaProps[] | []>([])
+  const [localeLis, setLocaleList] = useState<LocaleListProps[] | []>([])
+
+
   const { data: complianceData, isLoading } = useQuery({
     queryKey: ["complianceData"],
     queryFn: () => axios.get(`/data/compliance`),
   });
 
-  //   const { data: areaData, isLoading: areaIsLoading } = useQuery({
-  //     queryKey: ["areaData"],
-  //     queryFn: () => axios.get(`/data/compliance`),
-  //   });
+  const { data: localeData, isLoading: localeIsLoading, isError:localeOnError} = useQuery({
+    queryKey: ["localeData"],
+    queryFn: () => axios.get(`/data/locale`),
+  });
+
+    const { data: areaData, isLoading: areaIsLoading, isError:areaIsError} = useQuery({
+      queryKey: ["areaData"],
+      queryFn: () => axios.get(`/data/areas`),
+    });
+
+  useEffect(()=>{
+    if(areaData?.data && !areaIsError){
+      const data: AreaProps[] = areaData.data
+      setAreaList(data)
+    }
+    if(localeData?.data && !localeOnError){
+      const data: LocaleListProps[] = localeData.data
+      setLocaleList(data)
+    }
+  })
 
   useEffect(() => {
     if (complianceData?.data) {
@@ -128,7 +151,11 @@ const Compliance = ({
             >
               <div style={{ marginLeft: "16px" }}>
                 <Typography style={{ fontWeight: 500, fontSize: "1.1rem" }}>
+                  {hanldeSearchItem(item.fieldPushKey, areaList)}
                   {item.title}
+                </Typography>
+                <Typography>
+                  {handleSearchName(item.zipCode, localeLis)}
                 </Typography>
               </div>
             </Checkbox>

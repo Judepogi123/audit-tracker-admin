@@ -1,0 +1,77 @@
+:root {
+  padding: 0;
+  margin: 0;
+}
+:root .main-container {
+  background-color: #fff;
+  overflow-y: auto;
+}
+:root .main-container .title-container {
+  width: 100%;
+  padding: 16px;
+}
+:root .main-container .main-text {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+:root .main-container .content {
+  width: 100%;
+  height: 100%;
+  padding: 16px 16px 16px 32px;
+}
+:root .main-container .content .message-content {
+  text-align: justify;
+  padding: 8px;
+  font-size: 1.1rem;
+}
+:root .main-container .content .ref-section {
+  display: flex;
+  padding: 16px;
+  font-style: italic;
+}
+:root .main-container .content .proponents-profile {
+  width: 100%;
+  height: auto;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: auto auto auto auto auto;
+  gap: 8px;
+}
+:root .main-container .content .proponents-profile .developers {
+  width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+:root .main-container .content .proponents-profile .developers .profile-pic {
+  width: 100%;
+  height: 60%;
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+:root .main-container .content .proponents-profile .developers .profile-info {
+  width: 100%;
+  height: 40%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+:root .main-container .content .proponents-profile .developers .profile-info .info-item {
+  display: flex;
+  gap: 8px;
+}
+:root .main-container .content .proponents-profile .developers .profile-info .info-pos {
+  width: 100%;
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #0077b6;
+}
+:root .main-container .content .intern-details {
+  padding: 16px;
+  font-size: 1.1rem;
+}/*# sourceMappingURL=style.css.map */

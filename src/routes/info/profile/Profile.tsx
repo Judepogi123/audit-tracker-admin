@@ -49,7 +49,12 @@ const Profile = () => {
   const [onUpload, setOnUpload] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [onRemove, setOnRemove] = useState<boolean>(false);
+
+  //permissions
   const [permission, setPermission] = useState<PermissionsProps | undefined>();
+  const [currentUserpermission, setCurrentUserPermission] = useState<
+    PermissionsProps | undefined
+  >();
 
   const { userID } = useParams();
   const user = useUserData();
@@ -58,6 +63,22 @@ const Profile = () => {
     queryKey: ["userInfo"],
     queryFn: () => handleGetUserInfo(userID as string),
   });
+
+  useEffect(() => {
+    const handleUserPermission = () => {
+      try {
+        const temp: PermissionsProps =
+          user.userPermission === "all"
+            ? "all"
+            : JSON.parse(user.userPermission);
+        setCurrentUserPermission(temp);
+      } catch (error) {
+        messageApi.error(`Something went wrong with user permission`);
+      }
+    };
+
+    handleUserPermission();
+  }, [user]);
 
   useEffect(() => {
     const handleUserInfo = () => {
@@ -123,13 +144,13 @@ const Profile = () => {
     setEdited(true);
   }, [permission, initialData]);
 
-  const handleReload = async()=>{
+  const handleReload = async () => {
     try {
-      await refetch()
+      await refetch();
     } catch (error) {
-      messageApi.error(`Something wrong with reloading: ${error}`)
+      messageApi.error(`Something wrong with reloading: ${error}`);
     }
-  }
+  };
 
   const handleArchiveSelectedUser = async () => {
     setLoading(true);
@@ -144,7 +165,7 @@ const Profile = () => {
         setOnConfirm(false);
         messageApi.success(`Success!`);
         refetch();
-        return;
+        return "Hi!";
       }
       messageApi.error(`Faild!`);
     } catch (error) {
@@ -153,6 +174,8 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  console.log(currentUserpermission);
 
   const handleUpdateProfile = async () => {
     setLoading(true);
@@ -182,13 +205,15 @@ const Profile = () => {
       return;
     }
     setLoading(true);
+    console.log("CLick, Reset");
+    
     try {
       const request = await axios.post(`/auth/reset-password`, {
         username: userData?.userName,
         password: `${userData.userName}-dilg`,
+        userType: userData.userType
       });
       if (request.status === 200 && request.data.status === "ok") {
-        console.log(`${userData.userName}-dilg`);
         setOnReset(false);
         setLoading(false);
         messageApi.success(`Success!`);
@@ -542,14 +567,16 @@ const Profile = () => {
           padding: "8px",
         }}
       >
-        {user.userName === userData?.userName || user.userPermission === "all" && (
-          <Button onClick={() => setOnEdit(!onEdit)}>
-            {onEdit ? "Cancel" : "Edit"}
-          </Button>
-        )}
+        {user.userName === userData?.userName ||
+           (
+            <Button onClick={() => setOnEdit(!onEdit)}>
+              {onEdit ? "Cancel" : "Edit"}
+            </Button>
+          )}
 
         {onEdit && (
           <Button
+            // style={{display: user}}
             disabled={!edited}
             onClick={() => {
               setOnUpdate(true);
@@ -558,13 +585,74 @@ const Profile = () => {
             Update
           </Button>
         )}
-        <Button onClick={() => setOnConfirm(true)}>
+        <Button
+          onClick={() => {
+            console.log("Clicked");
+            if (
+              currentUserpermission &&
+              typeof currentUserpermission === "object" &&
+              "users" in currentUserpermission
+            ) {
+              if (
+                currentUserpermission.users === "usersR" ||
+                user.userPermission === "all"
+              ) {
+                messageApi.warning(
+                  `Current user is not authorized for this action!`
+                );
+                return;
+              }
+            }
+            setOnConfirm(true);
+          }}
+        >
           {userData?.userIsArchived === true ? "Unarchive" : "Archive"}
         </Button>
-        <Button onClick={() => setOnReset(true)}>Reset password</Button>
-        {userData?.userPermission || user.userPermission === "all" ? (
-          <Button onClick={()=> setOnRemove(true)}>Remove user</Button>
-        ) : null}
+        <Button
+          onClick={() => {
+            console.log("Clicked");
+            if (
+              currentUserpermission &&
+              typeof currentUserpermission === "object" &&
+              "users" in currentUserpermission
+            ) {
+              if (
+                currentUserpermission.users === "usersR" ||
+                user.userPermission === "all"
+              ) {
+                messageApi.warning(
+                  `Current user is not authorized for this action!`
+                );
+                return;
+              }
+            }
+            setOnReset(true);
+          }}
+        >
+          Reset password
+        </Button>
+        <Button
+          onClick={() => {
+            if (
+              currentUserpermission &&
+              typeof currentUserpermission === "object" &&
+              "users" in currentUserpermission
+            ) {
+              if (
+                currentUserpermission.users === "usersR" ||
+                user.userPermission === "all"
+              ) {
+                messageApi.warning(
+                  `Current user is not authorized for this action!`
+                );
+                return;
+              }
+            }
+            setOnRemove(true);
+          }}
+        >
+          Remove user
+        </Button>
       </div>
       {/* Archive user */}
       <Modal
@@ -605,7 +693,7 @@ const Profile = () => {
         title={`Update profile picture`}
         children={
           <ProfileUpload
-          handleReload={handleReload}
+            handleReload={handleReload}
             setLoading={setLoading}
             messageApi={messageApi}
             setOnUpload={setOnUpload}
@@ -630,9 +718,9 @@ const Profile = () => {
         }}
       />
 
-    {/* !!!Remove user */}
+      {/* !!!Remove user */}
       <Modal
-      onFunction={handleDeleteUser}
+        onFunction={handleDeleteUser}
         width={400}
         title={`Remove user: ${userData?.userFullName}`}
         children={`By confirming this action, the user will be remove permanently and cannot be undo afterwards.`}

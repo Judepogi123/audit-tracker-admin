@@ -11,11 +11,11 @@ import Modal from "../../../components/Modal";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../../server/api/axios";
-import { handleGetLocal, handleSaveLocal } from "../../../utils/localStorage";
+import { handleSaveLocal } from "../../../utils/localStorage";
 import { useUserData } from "../../../provider/DataProvider";
 import Checkbox from "../../../components/Checkbox";
 
-// page
+// pages
 import Area from "./selection/Area";
 import Compliance from "./selection/Compliance";
 
@@ -103,7 +103,8 @@ const Archive = () => {
 
   const handleExeAction = async (type: string,archive: string) => {
     if (!selectedList) return;
-
+    console.log(selectedList);
+    console.log(`/data/${type}-${archive}`);
     try {
       const response = await axios.post(`/data/${type}-${archive}`, {
         dataList: selectedList,
@@ -178,7 +179,7 @@ const Archive = () => {
           justifyContent: "space-between",
         }}
       >
-        <div>
+        <div style={{marginLeft: "16px"}}>
           <Checkbox
             checked={selectAll}
             onChange={() => setSelectAll(!selectAll)}
