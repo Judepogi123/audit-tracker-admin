@@ -204,9 +204,7 @@ const Profile = () => {
       messageApi.warning(`Invalid username!`);
       return;
     }
-    setLoading(true);
-    console.log("CLick, Reset");
-    
+    setLoading(true);    
     try {
       const request = await axios.post(`/auth/reset-password`, {
         username: userData?.userName,
