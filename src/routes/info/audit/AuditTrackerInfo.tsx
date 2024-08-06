@@ -12,7 +12,6 @@ import Button from "../../../components/Button";
 import Spinner from "../../../components/Spinner";
 
 //icons
-import { EditOutlined } from "@ant-design/icons";
 import { GoDotFill } from "react-icons/go";
 
 //utils
@@ -57,9 +56,6 @@ interface FieldProps {
   timestamp: string;
 }
 
-interface HoverIDProps {
-  id: string | null;
-}
 
 const AuditTrackerInfo = () => {
   const [currentField, setCurrrentField] = useState<FieldProps | null>(null);
@@ -71,6 +67,9 @@ const AuditTrackerInfo = () => {
   const { auditID, fieldID } = useParams();
 
   const navigate = useNavigate();
+
+  console.log(currentField);
+  
 
   const handleGetCurrentField = async () => {
     setIsLoading(true);

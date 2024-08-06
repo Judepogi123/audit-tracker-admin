@@ -66,6 +66,10 @@ const LandingPage = () => {
   const handleOpenModal = () => {
     setOnOpen(true);
   };
+
+  const openFileLink = () => {
+    window.open("https://firebasestorage.googleapis.com/v0/b/audit-tracker-d4e91.appspot.com/o/system%2FAdmin's%20User%20Manual.pdf?alt=media&token=6b10960d-47c5-4ce0-a9b9-f71aa1202188", "_blank"); 
+  };
   return (
     <Layout
       style={{
@@ -114,7 +118,7 @@ const LandingPage = () => {
         cancelHid={true}
         children={
           <div style={{width:"100%"}}>
-            <Button style={{width: "100%",backgroundColor: "#1982c4", color: "#fff", borderRadius: "16px"}}>Download</Button>
+            <Button onClick={openFileLink} style={{width: "100%",backgroundColor: "#1982c4", color: "#fff", borderRadius: "16px"}}>Download</Button>
           </div>
         }
         openModal={onOpen}

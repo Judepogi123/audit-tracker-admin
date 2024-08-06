@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "audit-tracker-admin",
+    "site": "dilg-audit-tracker-admin",
     "public": "dist",
     "ignore": [
       "firebase.json",
